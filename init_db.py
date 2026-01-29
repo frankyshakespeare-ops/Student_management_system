@@ -53,11 +53,12 @@ CREATE TABLE IF NOT EXISTS enrollments (
 """)
 
 cursor.execute("""
-CREATE TABLE IF NOT EXISTS results (
+CREATE TABLE results (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     enrollment_id INTEGER,
     subject_id INTEGER,
     score REAL,
+    semester INTEGER DEFAULT 1,
     FOREIGN KEY(enrollment_id) REFERENCES enrollments(id),
     FOREIGN KEY(subject_id) REFERENCES subjects(id)
 )

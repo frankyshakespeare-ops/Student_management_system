@@ -202,6 +202,58 @@ def add_result():
         subjects=subjects
     )
 
+@app.route("/bulletin/<int:enrollment_id>")
+def bulletin(enrollment_id):
+    conn = get_db_connection()
+
+    # Retrieve student information + class + year
+    enrollment = conn.execute("""
+        SELECT e.id, s.name AS student_name, c.name AS class_name, e.academic_year
+        FROM enrollments e
+        JOIN students s ON e.student_id = s.id
+        JOIN classes c ON e.class_id = c.id
+        WHERE e.id = ?
+    """, (enrollment_id,)).fetchone()
+
+    # Semester 1 grades
+    sem1_results = conn.execute("""
+        SELECT sub.name AS subject_name, r.score, sub.coefficient
+        FROM results r
+        JOIN subjects sub ON r.subject_id = sub.id
+        WHERE r.enrollment_id = ? AND r.semester = 1
+    """, (enrollment_id,)).fetchall()
+
+    # Semester 2 Grades
+    sem2_results = conn.execute("""
+        SELECT sub.name AS subject_name, r.score, sub.coefficient
+        FROM results r
+        JOIN subjects sub ON r.subject_id = sub.id
+        WHERE r.enrollment_id = ? AND r.semester = 2
+    """, (enrollment_id,)).fetchall()
+
+    conn.close()
+
+    # Total calculations and final average
+    def calculate_total_and_average(results):
+        total_score = sum(r["score"] * r["coefficient"] for r in results)
+        total_coeff = sum(r["coefficient"] for r in results)
+        average = total_score / total_coeff if total_coeff else 0
+        return total_score, total_coeff, average
+
+    total1, coeff1, avg1 = calculate_total_and_average(sem1_results)
+    total2, coeff2, avg2 = calculate_total_and_average(sem2_results)
+    final_average = (total1 + total2) / (coeff1 + coeff2) if (coeff1 + coeff2) else 0
+
+    return render_template(
+        "bulletin.html",
+        enrollment=enrollment,
+        sem1_results=sem1_results,
+        sem2_results=sem2_results,
+        total1=total1, total2=total2,
+        avg1=avg1, avg2=avg2,
+        final_average=final_average
+    )
+
 
 if __name__ == "__main__":
     app.run(debug=True)

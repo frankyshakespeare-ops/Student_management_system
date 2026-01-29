@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Bulletin: {{ enrollment.student_name }} ({{ enrollment.class_name }})</h2>
+<p>Academic Year: {{ enrollment.academic_year }}</p>
+
+<h3>Semester 1</h3>
+<table border="1">
+    <tr>
+        <th>Subject</th>
+        <th>Score</th>
+        <th>Coefficient</th>
+    </tr>
+    {% for r in sem1_results %}
+    <tr>
+        <td>{{ r.subject_name }}</td>
+        <td>{{ r.score }}</td>
+        <td>{{ r.coefficient }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <td><b>Total</b></td>
+        <td colspan="2">{{ total1 }}</td>
+    </tr>
+    <tr>
+        <td><b>Average</b></td>
+        <td colspan="2">{{ avg1 | round(2) }}</td>
+    </tr>
+</table>
+
+<h3>Semester 2</h3>
+<table border="1">
+    <tr>
+        <th>Subject</th>
+        <th>Score</th>
+        <th>Coefficient</th>
+    </tr>
+    {% for r in sem2_results %}
+    <tr>
+        <td>{{ r.subject_name }}</td>
+        <td>{{ r.score }}</td>
+        <td>{{ r.coefficient }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <td><b>Total</b></td>
+        <td colspan="2">{{ total2 }}</td>
+    </tr>
+    <tr>
+        <td><b>Average</b></td>
+        <td colspan="2">{{ avg2 | round(2) }}</td>
+    </tr>
+</table>
+
+<h3>Final Average: {{ final_average | round(2) }}</h3>
+{% endblock %}
