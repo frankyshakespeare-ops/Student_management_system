@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Students List</h2>
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Matricule</th>
+        <th>Date of Birth</th>
+        <th>Gender</th>
+    </tr>
+    {% for student in students %}
+    <tr>
+        <td>{{ student.id }}</td>
+        <td>{{ student.name }}</td>
+        <td>{{ student.matricule }}</td>
+        <td>{{ student.date_of_birth }}</td>
+        <td>{{ student.gender }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

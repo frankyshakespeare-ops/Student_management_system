@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Add Student</h2>
+<form method="POST">
+    <label>Name:</label><br>
+    <input type="text" name="name" required><br><br>
+
+    <label>Matricule:</label><br>
+    <input type="text" name="matricule" required><br><br>
+
+    <label>Date of Birth:</label><br>
+    <input type="date" name="date_of_birth"><br><br>
+
+    <label>Gender:</label><br>
+    <select name="gender">
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+    </select><br><br>
+
+    <button type="submit">Save</button>
+</form>
+{% endblock %}
