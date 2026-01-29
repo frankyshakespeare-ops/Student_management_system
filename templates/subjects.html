@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Subjects</h2>
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Coefficient</th>
+        <th>Class</th>
+    </tr>
+    {% for s in subjects %}
+    <tr>
+        <td>{{ s.id }}</td>
+        <td>{{ s.name }}</td>
+        <td>{{ s.coefficient }}</td>
+        <td>{{ s.class_name }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

@@ -117,6 +117,92 @@ def add_enrollment():
         classes=classes
     )
 
+# fetch all subjects
+@app.route("/subjects")
+def subjects():
+    conn = get_db_connection()
+    subjects = conn.execute("""
+        SELECT sub.id, sub.name, sub.coefficient, c.name AS class_name
+        FROM subjects sub
+        JOIN classes c ON sub.class_id = c.id
+    """).fetchall()
+    conn.close()
+    return render_template("subjects.html", subjects=subjects)
+
+
+# add one subject
+@app.route("/subjects/add", methods=["GET", "POST"])
+def add_subject():
+    conn = get_db_connection()
+    classes = conn.execute("SELECT id, name FROM classes").fetchall()
+
+    if request.method == "POST":
+        name = request.form["name"]
+        coefficient = request.form["coefficient"]
+        class_id = request.form["class_id"]
+
+        conn.execute(
+            "INSERT INTO subjects (name, coefficient, class_id) VALUES (?, ?, ?)",
+            (name, coefficient, class_id)
+        )
+        conn.commit()
+        conn.close()
+        return redirect(url_for("subjects"))
+
+    conn.close()
+    return render_template("add_subject.html", classes=classes)
+
+# fetch all results
+@app.route("/results")
+def results():
+    conn = get_db_connection()
+    results = conn.execute("""
+        SELECT r.id, s.name AS student_name, sub.name AS subject_name,
+               r.score, sub.coefficient
+        FROM results r
+        JOIN enrollments e ON r.enrollment_id = e.id
+        JOIN students s ON e.student_id = s.id
+        JOIN subjects sub ON r.subject_id = sub.id
+    """).fetchall()
+    conn.close()
+    return render_template("results.html", results=results)
+
+
+# add one results
+@app.route("/results/add", methods=["GET", "POST"])
+def add_result():
+    conn = get_db_connection()
+
+    enrollments = conn.execute("""
+        SELECT e.id, s.name || ' - ' || c.name || ' (' || e.academic_year || ')' AS label
+        FROM enrollments e
+        JOIN students s ON e.student_id = s.id
+        JOIN classes c ON e.class_id = c.id
+    """).fetchall()
+
+    subjects = conn.execute("SELECT id, name FROM subjects").fetchall()
+
+    if request.method == "POST":
+        enrollment_id = request.form["enrollment_id"]
+        subject_id = request.form["subject_id"]
+        score = request.form["score"]
+
+        conn.execute(
+            "INSERT INTO results (enrollment_id, subject_id, score) VALUES (?, ?, ?)",
+            (enrollment_id, subject_id, score)
+        )
+        conn.commit()
+        conn.close()
+        return redirect(url_for("results"))
+
+    conn.close()
+    return render_template(
+        "add_result.html",
+        enrollments=enrollments,
+        subjects=subjects
+    )
+
+
 if __name__ == "__main__":
     app.run(debug=True)
 

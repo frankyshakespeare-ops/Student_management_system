@@ -6,17 +6,29 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Student Management System</h1>
-    <nav>
-        <a href="{{ url_for('students') }}">Students</a> |
-        <a href="{{ url_for('add_student') }}">Add Student</a>
-        <a href="{{ url_for('classes') }}">Classes</a> |
-        <a href="{{ url_for('add_class') }}">Add Class</a> |
-        <a href="{{ url_for('enrollments') }}">Enrollments</a> |
-        <a href="{{ url_for('add_enrollment') }}">Add Enrollment</a> |
 
-    </nav>
-    <hr>
-    {% block content %}{% endblock %}
+<h1>Student Management System</h1>
+
+<nav>
+    <a href="{{ url_for('students') }}">Students</a> |
+    <a href="{{ url_for('add_student') }}">Add Student</a> |
+
+    <a href="{{ url_for('classes') }}">Classes</a> |
+    <a href="{{ url_for('add_class') }}">Add Class</a> |
+
+    <a href="{{ url_for('enrollments') }}">Enrollments</a> |
+    <a href="{{ url_for('add_enrollment') }}">Add Enrollment</a> |
+
+    <a href="{{ url_for('subjects') }}">Subjects</a> |
+    <a href="{{ url_for('add_subject') }}">Add Subject</a> |
+
+    <a href="{{ url_for('results') }}">Results</a> |
+    <a href="{{ url_for('add_result') }}">Add Result</a>
+</nav>
+
+<hr>
+
+{% block content %}{% endblock %}
+
 </body>
 </html>

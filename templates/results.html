@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Results</h2>
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Student</th>
+        <th>Subject</th>
+        <th>Score</th>
+        <th>Coefficient</th>
+    </tr>
+    {% for r in results %}
+    <tr>
+        <td>{{ r.id }}</td>
+        <td>{{ r.student_name }}</td>
+        <td>{{ r.subject_name }}</td>
+        <td>{{ r.score }}</td>
+        <td>{{ r.coefficient }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
