@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Add Class</h2>
+<form method="POST">
+    <label>Class Name:</label><br>
+    <input type="text" name="name" required><br><br>
+
+    <label>Level:</label><br>
+    <input type="text" name="level" required><br><br>
+
+    <button type="submit">Save</button>
+</form>
+{% endblock %}

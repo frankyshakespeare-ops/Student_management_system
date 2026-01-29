@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Classes</h2>
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Level</th>
+    </tr>
+    {% for c in classes %}
+    <tr>
+        <td>{{ c.id }}</td>
+        <td>{{ c.name }}</td>
+        <td>{{ c.level }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
