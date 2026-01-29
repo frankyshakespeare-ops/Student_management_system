@@ -75,6 +75,47 @@ def add_class():
 
     return render_template("add_class.html")
 
+# fetch all enrollments
+@app.route("/enrollments")
+def enrollments():
+    conn = get_db_connection()
+    enrollments = conn.execute("""
+        SELECT e.id, s.name AS student_name, c.name AS class_name, e.academic_year
+        FROM enrollments e
+        JOIN students s ON e.student_id = s.id
+        JOIN classes c ON e.class_id = c.id
+    """).fetchall()
+    conn.close()
+    return render_template("enrollments.html", enrollments=enrollments)
+
+
+# add one enrollment
+@app.route("/enrollments/add", methods=["GET", "POST"])
+def add_enrollment():
+    conn = get_db_connection()
+
+    students = conn.execute("SELECT id, name FROM students").fetchall()
+    classes = conn.execute("SELECT id, name FROM classes").fetchall()
+
+    if request.method == "POST":
+        student_id = request.form["student_id"]
+        class_id = request.form["class_id"]
+        academic_year = request.form["academic_year"]
+
+        conn.execute(
+            "INSERT INTO enrollments (student_id, class_id, academic_year) VALUES (?, ?, ?)",
+            (student_id, class_id, academic_year)
+        )
+        conn.commit()
+        conn.close()
+        return redirect(url_for("enrollments"))
+
+    conn.close()
+    return render_template(
+        "add_enrollment.html",
+        students=students,
+        classes=classes
+    )
 
 if __name__ == "__main__":
     app.run(debug=True)

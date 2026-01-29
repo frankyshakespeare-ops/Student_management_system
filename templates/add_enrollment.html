@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Add Enrollment</h2>
+<form method="POST">
+
+    <label>Student:</label><br>
+    <select name="student_id" required>
+        {% for s in students %}
+        <option value="{{ s.id }}">{{ s.name }}</option>
+        {% endfor %}
+    </select><br><br>
+
+    <label>Class:</label><br>
+    <select name="class_id" required>
+        {% for c in classes %}
+        <option value="{{ c.id }}">{{ c.name }}</option>
+        {% endfor %}
+    </select><br><br>
+
+    <label>Academic Year:</label><br>
+    <input type="text" name="academic_year" placeholder="2024-2025" required><br><br>
+
+    <button type="submit">Save</button>
+</form>
+{% endblock %}
