@@ -4,31 +4,31 @@
     <meta charset="UTF-8">
     <title>Student Management System</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
 </head>
 <body>
 
-<h1>Student Management System</h1>
+<div class="container">
 
-<nav>
-    <a href="{{ url_for('students') }}">Students</a> |
-    <a href="{{ url_for('add_student') }}">Add Student</a> |
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <h2 class="logo">🎓 School</h2>
+        <ul>
+            <li><a href="{{ url_for('students') }}"><i class='bx bx-user'></i> Students</a></li>
+            <li><a href="{{ url_for('classes') }}"><i class='bx bx-building'></i> Classes</a></li>
+            <li><a href="{{ url_for('subjects') }}"><i class='bx bx-book'></i> Subjects</a></li>
+            <li><a href="{{ url_for('enrollments') }}"><i class='bx bx-list-check'></i> Enrollments</a></li>
+            <li><a href="{{ url_for('results') }}"><i class='bx bx-bar-chart'></i> Results</a></li>
+            <li><a href="{{ url_for('logout') }}"><i class='bx bx-log-out'></i> Logout</a></li>
+        </ul>
+    </aside>
 
-    <a href="{{ url_for('classes') }}">Classes</a> |
-    <a href="{{ url_for('add_class') }}">Add Class</a> |
+    <!-- MAIN -->
+    <main class="main">
+        {% block content %}{% endblock %}
+    </main>
 
-    <a href="{{ url_for('enrollments') }}">Enrollments</a> |
-    <a href="{{ url_for('add_enrollment') }}">Add Enrollment</a> |
-
-    <a href="{{ url_for('subjects') }}">Subjects</a> |
-    <a href="{{ url_for('add_subject') }}">Add Subject</a> |
-
-    <a href="{{ url_for('results') }}">Results</a> |
-    <a href="{{ url_for('add_result') }}">Add Result</a>
-</nav>
-
-<hr>
-
-{% block content %}{% endblock %}
+</div>
 
 </body>
 </html>
