@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS enrollments (
 """)
 
 cursor.execute("""
-CREATE TABLE results (
+CREATE TABLE IF NOT EXISTS results (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     enrollment_id INTEGER,
     subject_id INTEGER,
