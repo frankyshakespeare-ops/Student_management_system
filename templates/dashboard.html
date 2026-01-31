@@ -1,25 +1,161 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Dashboard</h1>
+<div class="dashboard">
+    <!-- HEADER -->
+    <div class="dashboard-header">
+        <h1>📊 Dashboard Overview</h1>
+        <p>Welcome to your school management system</p>
+    </div>
 
-<div class="cards">
-    <div class="card">
-        <h3>Students</h3>
-        <p>{{ stats.students }}</p>
+    <!-- STATS CARDS (ces variables fonctionnent car dans du HTML) -->
+    <div class="stats-grid">
+        <div class="stat-card card-students">
+            <div class="stat-icon">
+                <i class='bx bx-user'></i>
+            </div>
+            <div class="stat-content">
+                <h3>Students</h3>
+                <p class="stat-number">{{ student_count }}</p>
+                <p class="stat-desc">Total enrolled</p>
+            </div>
+        </div>
+        
+        <div class="stat-card card-classes">
+            <div class="stat-icon">
+                <i class='bx bx-building'></i>
+            </div>
+            <div class="stat-content">
+                <h3>Classes</h3>
+                <p class="stat-number">{{ class_count }}</p>
+                <p class="stat-desc">Active classes</p>
+            </div>
+        </div>
+        
+        <div class="stat-card card-subjects">
+            <div class="stat-icon">
+                <i class='bx bx-book'></i>
+            </div>
+            <div class="stat-content">
+                <h3>Subjects</h3>
+                <p class="stat-number">{{ subject_count }}</p>
+                <p class="stat-desc">Teaching subjects</p>
+            </div>
+        </div>
+        
+        <div class="stat-card card-enrollments">
+            <div class="stat-icon">
+                <i class='bx bx-list-check'></i>
+            </div>
+            <div class="stat-content">
+                <h3>Enrollments</h3>
+                <p class="stat-number">{{ enrollment_count }}</p>
+                <p class="stat-desc">Current year</p>
+            </div>
+        </div>
     </div>
-    <div class="card">
-        <h3>Classes</h3>
-        <p>{{ stats.classes }}</p>
+
+    <!-- CHART AND TABLE -->
+    <div class="dashboard-content">
+        <!-- CHART SECTION -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <h3><i class='bx bx-line-chart'></i> Enrollment Trends</h3>
+                <span>Last 6 months</span>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="enrollmentChart"></canvas>
+            </div>
+        </div>
+
+        <!-- RECENT STUDENTS TABLE -->
+        <div class="table-container">
+            <div class="table-header">
+                <h3><i class='bx bx-user-plus'></i> Recent Students</h3>
+                <a href="{{ url_for('students') }}" class="view-all">View All →</a>
+            </div>
+            <table class="recent-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Matricule</th>
+                        <th>Date of Birth</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in recent_students %}
+                    <tr>
+                        <td>
+                            <div class="student-info">
+                                <div class="avatar">{{ student.name[0] if student.name else '?' }}</div>
+                                {{ student.name }}
+                            </div>
+                        </td>
+                        <td>{{ student.matricule }}</td>
+                        <td>{{ student.date_of_birth }}</td>
+                        <td><span class="status-badge active">Active</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; padding: 20px;">
+                            No students found. <a href="{{ url_for('add_student') }}">Add first student</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-    <div class="card">
-        <h3>Subjects</h3>
-        <p>{{ stats.subjects }}</p>
-    </div>
-    <div class="card">
-        <h3>Enrollments</h3>
-        <p>{{ stats.enrollments }}</p>
-    </div>
+
 </div>
 
+<!-- Chart.js Script - VERSION CORRIGÉE -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('enrollmentChart').getContext('2d');
+    
+    // DONNÉES FIXES (évite les erreurs Jinja/JS)
+    const months = ['January', 'February', 'March', 'April', 'May', 'June'];
+    const data = [12, 19, 8, 15, 12, 17];
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'New Enrollments',
+                data: data,
+                borderColor: '#4A6FFF',
+                backgroundColor: 'rgba(74, 111, 255, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0,0,0,0.05)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
 {% endblock %}

@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = "your_password" 
+app.secret_key = "your_password"
 
 # --- Databases ---
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -28,7 +28,7 @@ def create_admin():
     conn.close()
 
 create_admin()
-
+# --- Login Required Decorator ---
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -37,6 +37,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# --- Login ---
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -54,6 +55,7 @@ def login():
             return "Invalid credentials", 401
     return render_template("login.html")
 
+#--- Logout ---
 @app.route("/logout")
 def logout():
     session.pop("admin_logged_in", None)
@@ -74,6 +76,7 @@ def students():
     conn.close()
     return render_template("students.html", students=students)
 
+# --- Add Student ---
 @app.route("/students/add", methods=["GET", "POST"])
 @login_required
 def add_student():
@@ -102,6 +105,7 @@ def classes():
     conn.close()
     return render_template("classes.html", classes=classes)
 
+# --- Add Class ---
 @app.route("/classes/add", methods=["GET", "POST"])
 @login_required
 def add_class():
@@ -133,6 +137,7 @@ def enrollments():
     conn.close()
     return render_template("enrollments.html", enrollments=enrollments)
 
+# --- Add Enrollment ---
 @app.route("/enrollments/add", methods=["GET", "POST"])
 @login_required
 def add_enrollment():
@@ -169,6 +174,7 @@ def subjects():
     conn.close()
     return render_template("subjects.html", subjects=subjects)
 
+# --- Add Subject ---
 @app.route("/subjects/add", methods=["GET", "POST"])
 @login_required
 def add_subject():
@@ -207,6 +213,7 @@ def results():
     conn.close()
     return render_template("results.html", results=results)
 
+# --- Add Result ---
 @app.route("/results/add", methods=["GET", "POST"])
 @login_required
 def add_result():
@@ -285,6 +292,30 @@ def bulletin(enrollment_id):
         avg1=avg1, avg2=avg2,
         final_average=final_average
     )
+# --- Edit Student ---
+@app.route('/students/edit/<int:student_id>', methods=['GET', 'POST'])
+def edit_student(student_id):
+    student = Student.query.get_or_404(student_id)
+
+    if request.method == 'POST':
+        student.name = request.form['name']
+        student.matricule = request.form['matricule']
+        student.date_of_birth = request.form['date_of_birth']
+        student.gender = request.form['gender']
+
+        db.session.commit()
+        return redirect(url_for('students'))
+
+    return render_template('edit_student.html', student=student)
+
+# --- Delete Student ---
+@app.route('/students/delete/<int:student_id>')
+def delete_student(student_id):
+    student = Student.query.get_or_404(student_id)
+    db.session.delete(student)
+    db.session.commit()
+    return redirect(url_for('students'))
+
 
 # --- Run ---
 if __name__ == "__main__":

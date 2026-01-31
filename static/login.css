@@ -1,0 +1,108 @@
+* {
+    box-sizing: border-box;
+    font-family: "Segoe UI", sans-serif;
+}
+
+body {
+    margin: 0;
+    background: #f5f7fb;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.login-box {
+    background: #f5f7fb;
+    /* Largeur augmentée pour l'étirer légèrement */
+    width: 450px; 
+    padding: 30px;
+    border-radius: 12px;
+    /* Ombre retirée ici */
+    box-shadow: none; 
+    /* Optionnel : ajout d'une fine bordure pour que le bloc reste visible sur le fond gris clair */
+    /*border: 1px solid #e0e4ec;*/
+    text-align: center;
+}
+
+.login-box h2 {
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    color: #777;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.social-login {
+    display: flex;
+    gap: 10px;
+}
+
+.social-login button {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.divider {
+    margin: 20px 0;
+    font-size: 12px;
+    color: #aaa;
+}
+
+form input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.options {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 15px;
+}
+
+.options a {
+    text-decoration: none;
+    color: #1e293b;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    background: #1e293b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.login-btn:hover {
+    background: #1e293b;
+}
+
+.signup-text {
+    font-size: 13px;
+    margin-top: 15px;
+}
+
+.signup-text a {
+    color: #1e293b;
+    text-decoration: none;
+}
