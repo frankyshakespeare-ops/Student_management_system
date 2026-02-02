@@ -108,7 +108,7 @@ textarea:focus {
     display: flex;
     justify-content: flex-end;
     gap: 14px;
-    margin-top: 18px;      /* espace entre la card et les boutons */
+    margin-top: 18px;    
     padding-right: 6px;
 }
 

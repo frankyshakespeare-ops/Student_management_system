@@ -1,19 +1,60 @@
 {% extends "base.html" %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='classes.css') }}">
+{% endblock %}
+
 {% block content %}
-<h2>Classes</h2>
-<table border="1">
-    <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Level</th>
-    </tr>
-    {% for c in classes %}
-    <tr>
-        <td>{{ c.id }}</td>
-        <td>{{ c.name }}</td>
-        <td>{{ c.level }}</td>
-    </tr>
-    {% endfor %}
-</table>
+
+<div class="classes-page">
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+        <div class="filter-left">
+            <span class="filter-icon">☰</span>
+            <span>Filter by :</span>
+            <input type="text" placeholder="Designation">
+            <button class="btn-search">SEARCH</button>
+        </div>
+
+        <button class="btn-print">🖨 Print</button>
+    </div>
+
+    <!-- HEADER -->
+    <div class="classes-header">
+        <h2>CLASS LIST</h2>
+        <a href="{{ url_for('add_class') }}" class="add-class">➕ Add a class</a>
+    </div>
+
+    <!-- TABLE -->
+    <div class="classes-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Detail</th>
+                    <th>Class</th>
+                    <th>Capacity</th>
+                    <th>Fees</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for c in classes %}
+                <tr>
+                    <td class="detail">👁</td>
+                    <td>{{ c.name }}</td>
+                    <td>{{ c.capacity }}</td>
+                    <td>{{ c.fees }}</td>
+                    <td class="actions">
+                        ✏️ ❌
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
 {% endblock %}
