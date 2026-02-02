@@ -1,23 +1,60 @@
 {% extends "base.html" %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='add_student.css') }}">
+{% endblock %}
+
 {% block content %}
-<h2>Add Student</h2>
-<form method="POST">
-    <label>Name:</label><br>
-    <input type="text" name="name" required><br><br>
 
-    <label>Matricule:</label><br>
-    <input type="text" name="matricule" required><br><br>
+<div class="wrapper">
 
-    <label>Date of Birth:</label><br>
-    <input type="date" name="date_of_birth"><br><br>
+    <h2 class="title">Add New Student</h2>
 
-    <label>Gender:</label><br>
-    <select name="gender">
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-    </select><br><br>
+    <form method="POST" class="form-card">
 
-    <button type="submit">Save</button>
-</form>
+        <div class="form-header">
+            Personal Details
+        </div>
+
+        <div class="form-body">
+
+            <div class="row">
+                <div class="group">
+                    <label>Full Name *</label>
+                    <input type="text" name="name" required>
+                </div>
+
+                <div class="group">
+                    <label>Matricule *</label>
+                    <input type="text" name="matricule" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="group">
+                    <label>Date of Birth *</label>
+                    <input type="date" name="date_of_birth" required>
+                </div>
+
+                <div class="group">
+                    <label>Gender *</label>
+                    <select name="gender" required>
+                        <option value="">Select</option>
+                        <option>Male</option>
+                        <option>Female</option>
+                    </select>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="buttons-outside">
+            <button class="action-btn">Cancel</button>
+            <button class="action-btn primary">Save Student</button>
+        </div>
+
+    </form>
+
+</div>
+
 {% endblock %}
