@@ -1,21 +1,66 @@
 {% extends "base.html" %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='subjects.css') }}">
+{% endblock %}
+
 {% block content %}
-<h2>Subjects</h2>
-<table border="1">
-    <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Coefficient</th>
-        <th>Class</th>
-    </tr>
-    {% for s in subjects %}
-    <tr>
-        <td>{{ s.id }}</td>
-        <td>{{ s.name }}</td>
-        <td>{{ s.coefficient }}</td>
-        <td>{{ s.class_name }}</td>
-    </tr>
-    {% endfor %}
-</table>
+
+<div class="subjects-page">
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+        <div class="filter-left">
+            <span class="filter-icon">☰</span>
+            <span>Filter by :</span>
+            <input type="text" placeholder="Subject name">
+            <button class="btn-search">SEARCH</button>
+        </div>
+
+        <button class="btn-print">🖨 Print</button>
+    </div>
+
+    <!-- HEADER -->
+    <div class="subjects-header">
+        <h2>LIST OF SUBJECTS</h2>
+        <a href="{{ url_for('add_subject') }}" class="add-subject">➕ Add a subject</a>
+    </div>
+
+    <!-- TABLE CARD -->
+    <div class="subjects-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Detail</th>
+                    <th>Subject</th>
+                    <th>Coefficient</th>
+                    <th>Class</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for sub in subjects %}
+                <tr>
+                    <td class="detail">👁</td>
+                    <td>{{ sub.name }}</td>
+                    <td>{{ sub.coefficient }}</td>
+                    <td>{{ sub.class_name }}</td>
+                    <td class="actions">
+                        ✏️ ❌
+                    </td>
+                </tr>
+                {% endfor %}
+
+                {% if subjects|length == 0 %}
+                <tr>
+                    <td colspan="5" class="empty">No subject found</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
 {% endblock %}
