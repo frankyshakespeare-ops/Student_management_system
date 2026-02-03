@@ -1,23 +1,85 @@
 {% extends "base.html" %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='results.css') }}">
+{% endblock %}
+
 {% block content %}
-<h2>Results</h2>
-<table border="1">
-    <tr>
-        <th>ID</th>
-        <th>Student</th>
-        <th>Subject</th>
-        <th>Score</th>
-        <th>Coefficient</th>
-    </tr>
-    {% for r in results %}
-    <tr>
-        <td>{{ r.id }}</td>
-        <td>{{ r.student_name }}</td>
-        <td>{{ r.subject_name }}</td>
-        <td>{{ r.score }}</td>
-        <td>{{ r.coefficient }}</td>
-    </tr>
-    {% endfor %}
-</table>
+
+<div class="results-page">
+
+    <!-- Header -->
+    <div class="header">
+        <div>
+            <h1>Results</h1>
+            <p>Home / Results</p>
+        </div>
+        <a href="{{ url_for('add_result') }}" class="btn-primary">+ Add Result</a>
+    </div>
+
+    <!-- Card -->
+    <div class="card">
+        <div class="card-header">
+            <h2>Students Results</h2>
+
+            <div class="filters">
+                <input type="text" placeholder="Search by student or subject">
+                <select>
+                    <option value="">All Semesters</option>
+                    <option value="1">Semester 1</option>
+                    <option value="2">Semester 2</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>STUDENT</th>
+                    <th>SUBJECT</th>
+                    <th>SCORE</th>
+                    <th>COEFFICIENT</th>
+                    <th>SEMESTER</th>
+                    <th>ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for r in results %}
+                <tr>
+                    <td>{{ r.id }}</td>
+                    <td class="name">
+                        <img src="https://i.pravatar.cc/40?u={{ r.id }}">
+                        {{ r.student_name }}
+                    </td>
+                    <td>{{ r.subject_name }}</td>
+                    <td>
+                        <span class="score {% if r.score < 10 %}fail{% else %}pass{% endif %}">
+                            {{ r.score }}
+                        </span>
+                    </td>
+                    <td>{{ r.coefficient }}</td>
+                    <td>Semester {{ r.semester }}</td>
+                    <td class="actions">
+                        <a href="#" class="edit">Edit</a>
+                        <a href="#" class="delete">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+
+                {% if results|length == 0 %}
+                <tr>
+                    <td colspan="7" style="text-align:center;">No results found</td>
+                </tr>
+                {% endif %}
+
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+
 {% endblock %}
