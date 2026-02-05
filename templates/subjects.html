@@ -1,66 +1,94 @@
 {% extends "base.html" %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='subjects.css') }}">
-{% endblock %}
+{% block page_title %}Subjects{% endblock %}
+{% block page_heading %}Subjects{% endblock %}
+{% block breadcrumb %}Subjects{% endblock %}
 
 {% block content %}
 
-<div class="subjects-page">
+<div class="page-header">
+    <h2>Subjects List</h2>
+</div>
 
-    <!-- FILTER BAR -->
-    <div class="filter-bar">
-        <div class="filter-left">
-            <span class="filter-icon">☰</span>
-            <span>Filter by :</span>
-            <input type="text" placeholder="Subject name">
-            <button class="btn-search">SEARCH</button>
-        </div>
-
-        <button class="btn-print">🖨 Print</button>
+<div class="filter-bar">
+    <div class="filter-group">
+        <label>Search</label>
+        <input type="text" placeholder="Search by subject name">
     </div>
-
-    <!-- HEADER -->
-    <div class="subjects-header">
-        <h2>LIST OF SUBJECTS</h2>
-        <a href="{{ url_for('add_subject') }}" class="add-subject">➕ Add a subject</a>
+    <div class="filter-group">
+        <label>Class</label>
+        <select>
+            <option>All Classes</option>
+            {% for class in classes_list %}
+            <option value="{{ class.id }}">{{ class.name }}</option>
+            {% endfor %}
+        </select>
     </div>
+    <a href="{{ url_for('add_subject') }}" class="btn btn-primary">
+        + Add Subject
+    </a>
+</div>
 
-    <!-- TABLE CARD -->
-    <div class="subjects-card">
-        <table>
+<div class="card">
+    <div class="card-header">
+        Subjects Information
+    </div>
+    <div class="card-body">
+        <table class="table">
             <thead>
                 <tr>
-                    <th>Detail</th>
-                    <th>Subject</th>
+                    <th>#</th>
+                    <th>Subject Name</th>
                     <th>Coefficient</th>
                     <th>Class</th>
-                    <th>Action</th>
+                    <th>Teacher</th>
+                    <th class="text-right">Actions</th>
                 </tr>
             </thead>
-
             <tbody>
-                {% for sub in subjects %}
+                {% for subject in subjects %}
                 <tr>
-                    <td class="detail">👁</td>
-                    <td>{{ sub.name }}</td>
-                    <td>{{ sub.coefficient }}</td>
-                    <td>{{ sub.class_name }}</td>
-                    <td class="actions">
-                        ✏️ ❌
+                    <td>{{ subject.id }}</td>
+                    <td>{{ subject.name }}</td>
+                    <td>{{ subject.coefficient }}</td>
+                    <td>
+                        {% if subject.class_name %}
+                            {{ subject.class_name }}
+                        {% else %}
+                            <span class="text-muted">Not assigned</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if subject.teacher_name %}
+                            {{ subject.teacher_name }}
+                        {% else %}
+                            <span class="text-muted">Not assigned</span>
+                        {% endif %}
+                    </td>
+                    <td class="action-icons">
+                        <a href="{{ url_for('edit_subject', id=subject.id) }}" 
+                           class="edit" title="Edit">
+                            <i class='bx bx-edit'></i>
+                        </a>
+                        <a href="{{ url_for('delete_subject', id=subject.id) }}"
+                           class="delete"
+                           onclick="return confirm('Are you sure?');"
+                           title="Delete">
+                            <i class='bx bx-trash'></i>
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="empty-state">
+                        <i class='bx bx-book'></i>
+                        <p>No subjects found</p>
                     </td>
                 </tr>
                 {% endfor %}
-
-                {% if subjects|length == 0 %}
-                <tr>
-                    <td colspan="5" class="empty">No subject found</td>
-                </tr>
-                {% endif %}
             </tbody>
         </table>
     </div>
-
 </div>
 
 {% endblock %}

@@ -2,36 +2,124 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Student Management System</title>
-
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Management - {% block page_title %}Dashboard{% endblock %}</title>
+    
+    <!-- Boxicons -->
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS Unifié -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    
     {% block extra_css %}{% endblock %}
 </head>
+
 <body>
-
-<div class="container">
-
-    <!-- SIDEBAR -->
+<div class="app">
+    
+    <!-- SIDEBAR (votre design original) -->
     <aside class="sidebar">
-        <h2 class="logo">🎓 School</h2>
-        <ul>
-            <li><a href="{{ url_for('students') }}"><i class='bx bx-user'></i> Students</a></li>
-            <li><a href="{{ url_for('classes') }}"><i class='bx bx-building'></i> Classes</a></li>
-            <li><a href="{{ url_for('subjects') }}"><i class='bx bx-book'></i> Subjects</a></li>
-            <li><a href="{{ url_for('enrollments') }}"><i class='bx bx-list-check'></i> Enrollments</a></li>
-            <li><a href="{{ url_for('results') }}"><i class='bx bx-bar-chart'></i> Results</a></li>
-            <li><a href="{{ url_for('logout') }}"><i class='bx bx-log-out'></i> Logout</a></li>
-        </ul>
+        <div class="logo">🎓 School</div>
+        <nav>
+            <ul class="sidebar-nav">
+                <li><a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
+                    <i class='bx bxs-dashboard'></i> Dashboard
+                </a></li>
+                <li><a href="{{ url_for('students') }}" class="{% if request.endpoint == 'students' %}active{% endif %}">
+                    <i class='bx bxs-user'></i> Students
+                </a></li>
+                <li><a href="{{ url_for('teachers') }}" class="{% if request.endpoint == 'teachers' %}active{% endif %}">
+                    <i class='bx bxs-chalkboard'></i> Teachers
+                </a></li>
+                <li><a href="{{ url_for('classes') }}" class="{% if request.endpoint == 'classes' %}active{% endif %}">
+                    <i class='bx bxs-group'></i> Classes
+                </a></li>
+                <li><a href="{{ url_for('subjects') }}" class="{% if request.endpoint == 'subjects' %}active{% endif %}">
+                    <i class='bx bxs-book'></i> Subjects
+                </a></li>
+                <li><a href="{{ url_for('fees') }}" class="{% if request.endpoint == 'fees' %}active{% endif %}">
+                    <i class='bx bxs-wallet'></i> Fees
+                </a></li>
+                <li><a href="{{ url_for('enrollments') }}" class="{% if request.endpoint == 'enrollments' %}active{% endif %}">
+                    <i class='bx bxs-list-check'></i> Enrollments
+                </a></li>
+                <li><a href="{{ url_for('results') }}" class="{% if request.endpoint == 'results' %}active{% endif %}">
+                    <i class='bx bxs-bar-chart'></i> Results
+                </a></li>
+                <li><a href="{{ url_for('timetable') }}" class="{% if request.endpoint == 'timetable' %}active{% endif %}">
+                    <i class='bx bxs-calendar'></i> Timetable
+                </a></li>
+                <li><a href="{{ url_for('rooms') }}" class="{% if request.endpoint == 'rooms' %}active{% endif %}">
+                    <i class='bx bxs-door-open'></i> Rooms
+                </a></li>
+                <li><a href="{{ url_for('logout') }}">
+                    <i class='bx bx-log-out'></i> Logout
+                </a></li>
+            </ul>
+        </nav>
     </aside>
 
-    <!-- MAIN -->
-    <main class="main">
-        {% block content %}{% endblock %}
-    </main>
+    <!-- MAIN CONTENT -->
+    <div class="main">
+        
+        <!-- TOPBAR harmonisée -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <div class="page-title">
+                    <h1>{% block page_heading %}{% endblock %}</h1>
+                    <nav class="breadcrumb">
+                        <a href="{{ url_for('dashboard') }}">Home</a>
+                        <span class="divider">/</span>
+                        {% block breadcrumb %}{% endblock %}
+                    </nav>
+                </div>
+            </div>
+            
+            <div class="topbar-right">
+                <!-- Date Widget -->
+                <div class="date-widget">
+                    <i class='bx bxs-calendar'></i>
+                    <span id="current-date">{{ current_date|default('04 Feb 2026') }}</span>
+                </div>
+                
+                <!-- User Widget (simple) -->
+                <div class="user-widget">
+                    <img src="{{ session.get('avatar_url', 'https://i.pravatar.cc/40') }}" 
+                         class="user-avatar" 
+                         alt="{{ session.get('user_name', 'User') }}">
+                    <div class="user-info">
+                        <span class="user-name">{{ session.get('user_name', 'Administrator') }}</span>
+                        <span class="user-role">{{ session.get('user_role', 'Admin') }}</span>
+                    </div>
+                </div>
+            </div>
+        </header>
 
+        <!-- PAGE CONTENT -->
+        <section class="page-content">
+            {% block content %}{% endblock %}
+        </section>
+        
+    </div>
 </div>
 
+<!-- JavaScript -->
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+// Date dynamique
+document.addEventListener('DOMContentLoaded', function() {
+    const now = new Date();
+    const options = { day: '2-digit', month: 'short', year: 'numeric' };
+    const dateElement = document.getElementById('current-date');
+    if (dateElement) {
+        dateElement.textContent = now.toLocaleDateString('en-GB', options);
+    }
+});
+</script>
+
+{% block extra_js %}{% endblock %}
 </body>
 </html>

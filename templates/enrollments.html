@@ -1,69 +1,90 @@
 {% extends "base.html" %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='enrollments.css') }}">
-{% endblock %}
+{% block page_title %}Enrollments{% endblock %}
+{% block page_heading %}Enrollments{% endblock %}
+{% block breadcrumb %}Enrollments{% endblock %}
 
 {% block content %}
 
-<div class="enrollments-page">
+<div class="page-header">
+    <h2>Enrollments List</h2>
+</div>
 
-    <!-- FILTER BAR -->
-    <div class="filter-bar">
-        <div class="filter-left">
-            <span class="filter-icon">☰</span>
-            <span>Filtre par :</span>
-            <input type="text" placeholder="Student name">
-            <button class="btn-search">CHERCHER</button>
-        </div>
-
-        <button class="btn-print">🖨 Imprimer</button>
+<div class="filter-bar">
+    <div class="filter-group">
+        <label>Search</label>
+        <input type="text" placeholder="Search by student name">
     </div>
-
-    <!-- HEADER -->
-    <div class="enrollments-header">
-        <h2>LISTE DES INSCRIPTIONS</h2>
-        <a href="{{ url_for('add_enrollment') }}" class="add-enrollment">
-            ➕ Ajouter une inscription
-        </a>
+    <div class="filter-group">
+        <label>Class</label>
+        <select>
+            <option>All Classes</option>
+            {% for class in classes %}
+            <option value="{{ class.id }}">{{ class.name }}</option>
+            {% endfor %}
+        </select>
     </div>
+    <a href="{{ url_for('add_enrollment') }}" class="btn btn-primary">
+        + Add Enrollment
+    </a>
+</div>
 
-    <!-- TABLE CARD -->
-    <div class="enrollments-card">
-        <table>
+<div class="card">
+    <div class="card-header">
+        Enrollments Information
+    </div>
+    <div class="card-body">
+        <table class="table">
             <thead>
                 <tr>
-                    <th>Détail</th>
-                    <th>Étudiant</th>
-                    <th>Classe</th>
-                    <th>Année académique</th>
-                    <th>Action</th>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Class</th>
+                    <th>Academic Year</th>
+                    <th>Enrollment Date</th>
+                    <th class="text-right">Actions</th>
                 </tr>
             </thead>
-
             <tbody>
-                {% for e in enrollments %}
+                {% for enrollment in enrollments %}
                 <tr>
-                    <td class="detail">👁</td>
-                    <td>{{ e.student_name }}</td>
-                    <td>{{ e.class_name }}</td>
-                    <td>{{ e.academic_year }}</td>
-                    <td class="actions">
-                        <a href="{{ url_for('bulletin', enrollment_id=e.id) }}">📄</a>
-                        ✏️ ❌
+                    <td>{{ enrollment.id }}</td>
+                    <td class="user-cell">
+                        <img src="https://i.pravatar.cc/40?u={{ enrollment.student_id }}" 
+                             alt="{{ enrollment.student_name }}">
+                        <span>{{ enrollment.student_name }}</span>
+                    </td>
+                    <td>{{ enrollment.class_name }}</td>
+                    <td>{{ enrollment.academic_year }}</td>
+                    <td>{{ enrollment.enrollment_date }}</td>
+                    <td class="action-icons">
+                        <a href="{{ url_for('edit_enrollment', id=enrollment.id) }}" 
+                           class="edit" title="Edit">
+                            <i class='bx bx-edit'></i>
+                        </a>
+                        <a href="{{ url_for('bulletin', enrollment_id=enrollment.id) }}"
+                           class="view" title="View Bulletin">
+                            <i class='bx bx-file'></i>
+                        </a>
+                        <a href="{{ url_for('delete_enrollment', id=enrollment.id) }}"
+                           class="delete"
+                           onclick="return confirm('Are you sure?');"
+                           title="Delete">
+                            <i class='bx bx-trash'></i>
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="empty-state">
+                        <i class='bx bx-list-check'></i>
+                        <p>No enrollments found</p>
                     </td>
                 </tr>
                 {% endfor %}
-
-                {% if enrollments|length == 0 %}
-                <tr>
-                    <td colspan="5" class="empty">Aucune inscription trouvée</td>
-                </tr>
-                {% endif %}
             </tbody>
         </table>
     </div>
-
 </div>
 
 {% endblock %}

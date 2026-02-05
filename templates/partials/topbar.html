@@ -1,0 +1,16 @@
+<header class="topbar">
+    <div class="topbar-left">
+        <h1>{% block page_title %}{% endblock %}</h1>
+        <nav class="breadcrumb">{% block breadcrumb %}{% endblock %}</nav>
+    </div>
+    
+    <div class="topbar-right">
+        <!-- Version simple comme votre design original -->
+        <span class="current-date">{{ current_date }}</span>
+        <div class="user-info">
+            <span class="user-name">{{ session.user_name }}</span>
+            <span class="user-role">{{ session.user_role }}</span>
+        </div>
+        <!-- Option: ajouter une icône notification discrète -->
+    </div>
+</header>

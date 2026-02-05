@@ -1,53 +1,56 @@
 {% extends "base.html" %}
 
-{% block page_title %}Classes{% endblock %}
-{% block page_heading %}Classes{% endblock %}
-{% block breadcrumb %}Classes{% endblock %}
+{% block page_title %}Rooms{% endblock %}
+{% block page_heading %}Rooms{% endblock %}
+{% block breadcrumb %}Rooms{% endblock %}
 
 {% block content %}
 
 <div class="page-header">
-    <h2>Classes List</h2>
+    <h2>Rooms List</h2>
 </div>
 
 <div class="filter-bar">
     <div class="filter-group">
         <label>Search</label>
-        <input type="text" placeholder="Search by class name">
+        <input type="text" placeholder="Search by room name or location">
     </div>
-    <a href="{{ url_for('add_class') }}" class="btn btn-primary">
-        + Add Class
+    <a href="{{ url_for('add_room') }}" class="btn btn-primary">
+        + Add Room
     </a>
 </div>
 
 <div class="card">
     <div class="card-header">
-        Classes Information
+        Rooms Information
     </div>
     <div class="card-body">
         <table class="table">
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Class Name</th>
+                    <th>Room Name</th>
                     <th>Capacity</th>
-                    <th>Fees</th>
+                    <th>Location</th>
                     <th class="text-right">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for class in classes %}
+                {% for room in rooms %}
                 <tr>
-                    <td>{{ class.id }}</td>
-                    <td>{{ class.name }}</td>
-                    <td>{{ class.capacity }}</td>
-                    <td>${{ class.fees }}</td>
+                    <td>{{ room.id }}</td>
+                    <td>
+                        <i class='bx bx-building-house'></i>
+                        {{ room.name }}
+                    </td>
+                    <td>{{ room.capacity }}</td>
+                    <td>{{ room.location or "-" }}</td>
                     <td class="action-icons">
-                        <a href="{{ url_for('edit_class', id=class.id) }}" 
+                        <a href="{{ url_for('edit_room', id=room.id) }}" 
                            class="edit" title="Edit">
                             <i class='bx bx-edit'></i>
                         </a>
-                        <a href="{{ url_for('delete_class', id=class.id) }}"
+                        <a href="{{ url_for('delete_room', id=room.id) }}"
                            class="delete"
                            onclick="return confirm('Are you sure?');"
                            title="Delete">
@@ -58,8 +61,8 @@
                 {% else %}
                 <tr>
                     <td colspan="5" class="empty-state">
-                        <i class='bx bx-building-house'></i>
-                        <p>No classes found</p>
+                        <i class='bx bx-door-open'></i>
+                        <p>No rooms found</p>
                     </td>
                 </tr>
                 {% endfor %}

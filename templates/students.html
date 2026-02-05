@@ -1,81 +1,77 @@
 {% extends "base.html" %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='students.css') }}">
-{% endblock %}
+{% block page_title %}Students{% endblock %}
+{% block page_heading %}Students{% endblock %}
+{% block breadcrumb %}Students{% endblock %}
 
 {% block content %}
 
-<div class="students-page">
+<div class="page-header">
+    <h2>Students List</h2>
+</div>
 
-    <!-- Header -->
-    <div class="header">
-        <div>
-            <h1>Students List</h1>
-            <p>Home / Students</p>
-        </div>
-        <a href="{{ url_for('add_student') }}" class="btn-primary">+ Add Student</a>
+<div class="filter-bar">
+    <div class="filter-group">
+        <label>Search</label>
+        <input type="text" placeholder="Search by name or matricule">
     </div>
+    <a href="{{ url_for('add_student') }}" class="btn btn-primary">
+        + Add Student
+    </a>
+</div>
 
-    <!-- Card -->
-    <div class="card">
-        <div class="card-header">
-            <h2>Students Information</h2>
-
-            <div class="filters">
-                <input type="text" placeholder="Search by name or matricule">
-                <select>
-                    <option>All</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- Table -->
-        <table>
+<div class="card">
+    <div class="card-header">
+        Students Information
+    </div>
+    <div class="card-body">
+        <table class="table">
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>STUDENT NAME</th>
-                    <th>MATRICULE</th>
-                    <th>DATE OF BIRTH</th>
-                    <th>GENDER</th>
+                    <th>Student Name</th>
+                    <th>Matricule</th>
+                    <th>Date of Birth</th>
+                    <th>Gender</th>
+                    <th class="text-right">Actions</th>
                 </tr>
             </thead>
             <tbody>
-
                 {% for student in students %}
                 <tr>
                     <td>{{ student.id }}</td>
-
-                    <td class="name">
-                        <img src="https://i.pravatar.cc/40?u={{ student.id }}">
-                        {{ student.name }}
+                    <td class="user-cell">
+                        <img src="https://i.pravatar.cc/40?u={{ student.id }}" 
+                             alt="{{ student.name }}">
+                        <span>{{ student.name }}</span>
                     </td>
-
                     <td>{{ student.matricule }}</td>
                     <td>{{ student.date_of_birth }}</td>
                     <td>{{ student.gender }}</td>
-
-                    <td class="actions">
-                        <a href="{{ url_for('edit_student', student_id=student.id) }}" class="btn-edit">
-                            ✏️
+                    <td class="action-icons">
+                        <a href="{{ url_for('edit_student', id=student.id) }}" 
+                           class="edit" title="Edit">
+                            <i class='bx bx-edit'></i>
                         </a>
-
-                        <a href="{{ url_for('delete_student', student_id=student.id) }}"
-                        class="btn-delete"
-                        onclick="return confirm('Are you sure you want to delete this student?');">
-                            🗑️
+                        <a href="{{ url_for('delete_student', id=student.id) }}"
+                           class="delete"
+                           onclick="return confirm('Are you sure?');"
+                           title="Delete">
+                            <i class='bx bx-trash'></i>
                         </a>
                     </td>
                 </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="empty-state">
+                        <i class='bx bx-user-x'></i>
+                        <p>No students found</p>
+                    </td>
+                </tr>
                 {% endfor %}
-
-
             </tbody>
         </table>
-
     </div>
-
 </div>
 
 {% endblock %}

@@ -81,3 +81,51 @@ body {
     font-weight: bold;
     margin-top: 10px;
 }
+
+.topbar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px 40px;
+    background: #f5f6fa;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.topbar-item {
+    background: #fff;
+    padding: 10px 12px;
+    border-radius: 10px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+    cursor: pointer;
+}
+
+.topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    padding: 8px 14px;
+    border-radius: 14px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+}
+
+.topbar-user img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+}
+
+.topbar-user span {
+    display: block;
+    font-size: 12px;
+    color: #9ca3af;
+}
+.topbar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 14px 40px 6px; /* ↓ réduit la hauteur */
+}

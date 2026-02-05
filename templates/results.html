@@ -1,85 +1,91 @@
 {% extends "base.html" %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='results.css') }}">
-{% endblock %}
+{% block page_title %}Results{% endblock %}
+{% block page_heading %}Results{% endblock %}
+{% block breadcrumb %}Results{% endblock %}
 
 {% block content %}
 
-<div class="results-page">
+<div class="page-header">
+    <h2>Results List</h2>
+</div>
 
-    <!-- Header -->
-    <div class="header">
-        <div>
-            <h1>Results</h1>
-            <p>Home / Results</p>
-        </div>
-        <a href="{{ url_for('add_result') }}" class="btn-primary">+ Add Result</a>
+<div class="filter-bar">
+    <div class="filter-group">
+        <label>Search</label>
+        <input type="text" placeholder="Search by student or subject">
     </div>
+    <div class="filter-group">
+        <label>Semester</label>
+        <select>
+            <option>All Semesters</option>
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+        </select>
+    </div>
+    <a href="{{ url_for('add_result') }}" class="btn btn-primary">
+        + Add Result
+    </a>
+</div>
 
-    <!-- Card -->
-    <div class="card">
-        <div class="card-header">
-            <h2>Students Results</h2>
-
-            <div class="filters">
-                <input type="text" placeholder="Search by student or subject">
-                <select>
-                    <option value="">All Semesters</option>
-                    <option value="1">Semester 1</option>
-                    <option value="2">Semester 2</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- Table -->
-        <table>
+<div class="card">
+    <div class="card-header">
+        Students Results
+    </div>
+    <div class="card-body">
+        <table class="table">
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>STUDENT</th>
-                    <th>SUBJECT</th>
-                    <th>SCORE</th>
-                    <th>COEFFICIENT</th>
-                    <th>SEMESTER</th>
-                    <th>ACTIONS</th>
+                    <th>Student</th>
+                    <th>Subject</th>
+                    <th>Score</th>
+                    <th>Coefficient</th>
+                    <th>Semester</th>
+                    <th class="text-right">Actions</th>
                 </tr>
             </thead>
             <tbody>
-
-                {% for r in results %}
+                {% for result in results %}
                 <tr>
-                    <td>{{ r.id }}</td>
-                    <td class="name">
-                        <img src="https://i.pravatar.cc/40?u={{ r.id }}">
-                        {{ r.student_name }}
+                    <td>{{ result.id }}</td>
+                    <td class="user-cell">
+                        <img src="https://i.pravatar.cc/40?u={{ result.student_id }}" 
+                             alt="{{ result.student_name }}">
+                        <span>{{ result.student_name }}</span>
                     </td>
-                    <td>{{ r.subject_name }}</td>
+                    <td>{{ result.subject_name }}</td>
                     <td>
-                        <span class="score {% if r.score < 10 %}fail{% else %}pass{% endif %}">
-                            {{ r.score }}
+                        <span class="{% if result.score < 10 %}badge badge-danger{% else %}badge badge-success{% endif %}">
+                            {{ result.score }}
                         </span>
                     </td>
-                    <td>{{ r.coefficient }}</td>
-                    <td>Semester {{ r.semester }}</td>
-                    <td class="actions">
-                        <a href="#" class="edit">Edit</a>
-                        <a href="#" class="delete">Delete</a>
+                    <td>{{ result.coefficient }}</td>
+                    <td>Semester {{ result.semester }}</td>
+                    <td class="action-icons">
+                        <a href="{{ url_for('edit_result', id=result.id) }}" 
+                           class="edit" title="Edit">
+                            <i class='bx bx-edit'></i>
+                        </a>
+                        <a href="{{ url_for('delete_result', id=result.id) }}"
+                           class="delete"
+                           onclick="return confirm('Are you sure?');"
+                           title="Delete">
+                            <i class='bx bx-trash'></i>
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="empty-state">
+                        <i class='bx bx-bar-chart'></i>
+                        <p>No results found</p>
                     </td>
                 </tr>
                 {% endfor %}
-
-                {% if results|length == 0 %}
-                <tr>
-                    <td colspan="7" style="text-align:center;">No results found</td>
-                </tr>
-                {% endif %}
-
             </tbody>
         </table>
-
     </div>
-
 </div>
 
 {% endblock %}

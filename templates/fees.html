@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block page_title %}Fees{% endblock %}
+{% block page_heading %}Fees{% endblock %}
+{% block breadcrumb %}Fees{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <h2>School Fees</h2>
+</div>
+
+<div class="filter-bar">
+    <div class="filter-group">
+        <label>Class</label>
+        <select>
+            <option>All Classes</option>
+            {% for c in classes %}
+            <option value="{{ c.id }}">{{ c.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <a href="{{ url_for('add_fee') }}" class="btn btn-primary">
+    + Add Fee
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        Fees Status
+    </div>
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Class</th>
+                    <th>Total Fee</th>
+                    <th>Paid</th>
+                    <th>Remaining</th>
+                    <th>Status</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fee in fees %}
+                <tr>
+                    <td>{{ fee.id }}</td>
+                    <td class="user-cell">
+                        <img src="https://i.pravatar.cc/40?u={{ fee.student_id }}" 
+                             alt="{{ fee.student_name }}">
+                        <span>{{ fee.student_name }}</span>
+                    </td>
+                    <td>{{ fee.class_name }}</td>
+                    <td>${{ fee.total_fee }}</td>
+                    <td>${{ fee.amount_paid }}</td>
+                    <td>${{ fee.remaining }}</td>
+                    <td>
+                        {% if fee.remaining == 0 %}
+                            <span class="badge badge-success">Paid</span>
+                        {% else %}
+                            <span class="badge badge-warning">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td class="action-icons">
+                        <a href="{{ url_for('edit_fee', id=fee.id) }}" 
+                           class="edit" title="Edit">
+                            <i class='bx bx-edit'></i>
+                        </a>
+                        <a href="{{ url_for('add_payment', student_id=fee.student_id) }}"
+                           class="payment" title="Add Payment">
+                            <i class='bx bx-money'></i>
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="empty-state">
+                        <i class='bx bx-wallet'></i>
+                        <p>No fees data</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

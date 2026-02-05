@@ -1,161 +1,247 @@
 {% extends "base.html" %}
 
+{% block page_title %}Dashboard{% endblock %}
+{% block page_heading %}Dashboard{% endblock %}
+{% block breadcrumb %}Dashboard{% endblock %}
+
 {% block content %}
-<div class="dashboard">
-    <!-- HEADER -->
-    <div class="dashboard-header">
-        <h1>📊 Dashboard Overview</h1>
-        <p>Welcome to your school management system</p>
-    </div>
 
-    <!-- STATS CARDS (ces variables fonctionnent car dans du HTML) -->
-    <div class="stats-grid">
-        <div class="stat-card card-students">
-            <div class="stat-icon">
-                <i class='bx bx-user'></i>
-            </div>
-            <div class="stat-content">
-                <h3>Students</h3>
-                <p class="stat-number">{{ student_count }}</p>
-                <p class="stat-desc">Total enrolled</p>
-            </div>
+<div class="dashboard-grid">
+    <!-- Stats Cards -->
+    <div class="stats-card">
+        <div class="stats-icon" style="background: #e0f2fe;">
+            <i class='bx bxs-graduation'></i>
         </div>
-        
-        <div class="stat-card card-classes">
-            <div class="stat-icon">
-                <i class='bx bx-building'></i>
-            </div>
-            <div class="stat-content">
-                <h3>Classes</h3>
-                <p class="stat-number">{{ class_count }}</p>
-                <p class="stat-desc">Active classes</p>
-            </div>
-        </div>
-        
-        <div class="stat-card card-subjects">
-            <div class="stat-icon">
-                <i class='bx bx-book'></i>
-            </div>
-            <div class="stat-content">
-                <h3>Subjects</h3>
-                <p class="stat-number">{{ subject_count }}</p>
-                <p class="stat-desc">Teaching subjects</p>
-            </div>
-        </div>
-        
-        <div class="stat-card card-enrollments">
-            <div class="stat-icon">
-                <i class='bx bx-list-check'></i>
-            </div>
-            <div class="stat-content">
-                <h3>Enrollments</h3>
-                <p class="stat-number">{{ enrollment_count }}</p>
-                <p class="stat-desc">Current year</p>
-            </div>
+        <div class="stats-content">
+            <h3>{{ students_count|default(0) }}</h3>
+            <p>Total Students</p>
         </div>
     </div>
 
-    <!-- CHART AND TABLE -->
-    <div class="dashboard-content">
-        <!-- CHART SECTION -->
-        <div class="chart-container">
-            <div class="chart-header">
-                <h3><i class='bx bx-line-chart'></i> Enrollment Trends</h3>
-                <span>Last 6 months</span>
-            </div>
-            <div class="chart-wrapper">
-                <canvas id="enrollmentChart"></canvas>
-            </div>
+    <div class="stats-card">
+        <div class="stats-icon" style="background: #f0f9ff;">
+            <i class='bx bxs-user-badge'></i>
         </div>
-
-        <!-- RECENT STUDENTS TABLE -->
-        <div class="table-container">
-            <div class="table-header">
-                <h3><i class='bx bx-user-plus'></i> Recent Students</h3>
-                <a href="{{ url_for('students') }}" class="view-all">View All →</a>
-            </div>
-            <table class="recent-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Matricule</th>
-                        <th>Date of Birth</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for student in recent_students %}
-                    <tr>
-                        <td>
-                            <div class="student-info">
-                                <div class="avatar">{{ student.name[0] if student.name else '?' }}</div>
-                                {{ student.name }}
-                            </div>
-                        </td>
-                        <td>{{ student.matricule }}</td>
-                        <td>{{ student.date_of_birth }}</td>
-                        <td><span class="status-badge active">Active</span></td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="4" style="text-align: center; padding: 20px;">
-                            No students found. <a href="{{ url_for('add_student') }}">Add first student</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="stats-content">
+            <h3>{{ teachers_count|default(0) }}</h3>
+            <p>Total Teachers</p>
         </div>
     </div>
 
+    <div class="stats-card">
+        <div class="stats-icon" style="background: #fef3c7;">
+            <i class='bx bxs-group'></i>
+        </div>
+        <div class="stats-content">
+            <h3>{{ classes_count|default(0) }}</h3>
+            <p>Total Classes</p>
+        </div>
+    </div>
+
+    <div class="stats-card">
+        <div class="stats-icon" style="background: #fee2e2;">
+            <i class='bx bxs-wallet'></i>
+        </div>
+        <div class="stats-content">
+            <h3>{{ pending_fees|default(0) }}</h3>
+            <p>Pending Fees</p>
+        </div>
+    </div>
 </div>
 
-<!-- Chart.js Script - VERSION CORRIGÉE -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('enrollmentChart').getContext('2d');
+<!-- Recent Enrollments -->
+<div class="card">
+    <div class="card-header">
+        <h2>Recent Enrollments</h2>
+        <a href="{{ url_for('enrollments') }}" class="btn btn-sm btn-secondary">View All</a>
+    </div>
+    <div class="card-body">
+        {% if recent_enrollments and recent_enrollments|length > 0 %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Class</th>
+                    <th>Academic Year</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for enrollment in recent_enrollments %}
+                <tr>
+                    <td class="user-cell">
+                        <img src="https://i.pravatar.cc/40?u={{ enrollment.id }}" 
+                             alt="{{ enrollment.student_name }}">
+                        <span>{{ enrollment.student_name }}</span>
+                    </td>
+                    <td>{{ enrollment.class_name }}</td>
+                    <td>{{ enrollment.academic_year }}</td>
+                    <td>
+                        <span class="badge badge-success">Active</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class='bx bx-list-check'></i>
+            <p>No recent enrollments found</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card">
+    <div class="card-header">
+        <h2>Quick Actions</h2>
+    </div>
+    <div class="card-body">
+        <div class="quick-actions-grid">
+            <a href="{{ url_for('add_student') }}" class="quick-action">
+                <i class='bx bx-user-plus'></i>
+                <span>Add Student</span>
+            </a>
+            <a href="{{ url_for('add_teacher') }}" class="quick-action">
+                <i class='bx bx-user-plus'></i>
+                <span>Add Teacher</span>
+            </a>
+            <a href="{{ url_for('add_fee') }}" class="quick-action">
+                <i class='bx bx-money'></i>
+                <span>Add Fee</span>
+            </a>
+            <a href="{{ url_for('add_enrollment') }}" class="quick-action">
+                <i class='bx bx-list-plus'></i>
+                <span>Add Enrollment</span>
+            </a>
+            <a href="{{ url_for('add_result') }}" class="quick-action">
+                <i class='bx bx-bar-chart-alt-2'></i>
+                <span>Add Result</span>
+            </a>
+            <a href="{{ url_for('add_timetable') }}" class="quick-action">
+                <i class='bx bx-calendar-plus'></i>
+                <span>Add Schedule</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stats-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid #e5e7eb;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stats-icon i {
+    font-size: 28px;
+    color: white;
+}
+
+.stats-content h3 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.25rem;
+    line-height: 1;
+}
+
+.stats-content p {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+/* Quick Actions */
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+}
+
+.quick-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 1rem;
+    background: #f9fafb;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #374151;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.quick-action:hover {
+    background: white;
+    border-color: #e5e7eb;
+    color: #111827;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.quick-action i {
+    font-size: 32px;
+    margin-bottom: 0.75rem;
+    color: #4f46e5;
+}
+
+.quick-action span {
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
     
-    // DONNÉES FIXES (évite les erreurs Jinja/JS)
-    const months = ['January', 'February', 'March', 'April', 'May', 'June'];
-    const data = [12, 19, 8, 15, 12, 17];
+    .quick-actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
     
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: months,
-            datasets: [{
-                label: 'New Enrollments',
-                data: data,
-                borderColor: '#4A6FFF',
-                backgroundColor: 'rgba(74, 111, 255, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        color: 'rgba(0,0,0,0.05)'
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false
-                    }
-                }
-            }
-        }
-    });
-});
-</script>
+    .quick-actions-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
 {% endblock %}

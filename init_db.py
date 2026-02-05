@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS classes (
 )
 """)
 
+
 # --- TEACHERS (detailed) ---
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS teachers (
@@ -105,17 +106,18 @@ CREATE TABLE IF NOT EXISTS rooms (
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS timetable (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    class_id INTEGER NOT NULL,
+    subject_id INTEGER NOT NULL,
+    teacher_id INTEGER NOT NULL,
+    room_id INTEGER NOT NULL,
     day TEXT NOT NULL,
     start_time TEXT NOT NULL,
     end_time TEXT NOT NULL,
-    subject_id INTEGER,
-    room_id INTEGER,
-    teacher_id INTEGER,
-    class_id INTEGER,
+
+    FOREIGN KEY(class_id) REFERENCES classes(id),
     FOREIGN KEY(subject_id) REFERENCES subjects(id),
-    FOREIGN KEY(room_id) REFERENCES rooms(id),
     FOREIGN KEY(teacher_id) REFERENCES teachers(id),
-    FOREIGN KEY(class_id) REFERENCES classes(id)
+    FOREIGN KEY(room_id) REFERENCES rooms(id)
 )
 """)
 
@@ -127,6 +129,22 @@ CREATE TABLE IF NOT EXISTS admins (
     password TEXT NOT NULL
 )
 """)
+#  --- FEES MANAGEMENT ---
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS fees (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    student_id INTEGER NOT NULL,
+    class_id INTEGER NOT NULL,
+    total_fee REAL NOT NULL,
+    amount_paid REAL DEFAULT 0,
+    payment_mode TEXT,
+    status TEXT DEFAULT 'Unpaid',
+
+    FOREIGN KEY(student_id) REFERENCES students(id),
+    FOREIGN KEY(class_id) REFERENCES classes(id)
+)
+""")
+
 
 conn.commit()
 conn.close()
