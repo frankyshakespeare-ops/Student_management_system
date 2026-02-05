@@ -20,45 +20,97 @@
 <body>
 <div class="app">
     
-    <!-- SIDEBAR (votre design original) -->
+    <!-- SIDEBAR AMÉLIORÉE AVEC SECTIONS -->
     <aside class="sidebar">
-        <div class="logo">🎓 School</div>
-        <nav>
-            <ul class="sidebar-nav">
-                <li><a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">
-                    <i class='bx bxs-dashboard'></i> Dashboard
-                </a></li>
-                <li><a href="{{ url_for('students') }}" class="{% if request.endpoint == 'students' %}active{% endif %}">
-                    <i class='bx bxs-user'></i> Students
-                </a></li>
-                <li><a href="{{ url_for('teachers') }}" class="{% if request.endpoint == 'teachers' %}active{% endif %}">
-                    <i class='bx bxs-chalkboard'></i> Teachers
-                </a></li>
-                <li><a href="{{ url_for('classes') }}" class="{% if request.endpoint == 'classes' %}active{% endif %}">
-                    <i class='bx bxs-group'></i> Classes
-                </a></li>
-                <li><a href="{{ url_for('subjects') }}" class="{% if request.endpoint == 'subjects' %}active{% endif %}">
-                    <i class='bx bxs-book'></i> Subjects
-                </a></li>
-                <li><a href="{{ url_for('fees') }}" class="{% if request.endpoint == 'fees' %}active{% endif %}">
-                    <i class='bx bxs-wallet'></i> Fees
-                </a></li>
-                <li><a href="{{ url_for('enrollments') }}" class="{% if request.endpoint == 'enrollments' %}active{% endif %}">
-                    <i class='bx bxs-list-check'></i> Enrollments
-                </a></li>
-                <li><a href="{{ url_for('results') }}" class="{% if request.endpoint == 'results' %}active{% endif %}">
-                    <i class='bx bxs-bar-chart'></i> Results
-                </a></li>
-                <li><a href="{{ url_for('timetable') }}" class="{% if request.endpoint == 'timetable' %}active{% endif %}">
-                    <i class='bx bxs-calendar'></i> Timetable
-                </a></li>
-                <li><a href="{{ url_for('rooms') }}" class="{% if request.endpoint == 'rooms' %}active{% endif %}">
-                    <i class='bx bxs-door-open'></i> Rooms
-                </a></li>
-                <li><a href="{{ url_for('logout') }}">
-                    <i class='bx bx-log-out'></i> Logout
-                </a></li>
-            </ul>
+        <div class="sidebar-header">
+            <div class="logo">🎓 School</div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <!-- SECTION MAIN -->
+            <div class="nav-section">
+                <span class="section-label">MAIN</span>
+                <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                    <i class='bx bxs-dashboard'></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+
+            <!-- SECTION ACADEMIC -->
+            <div class="nav-section">
+                <span class="section-label">ACADEMIC</span>
+                <a href="{{ url_for('students') }}" class="nav-item {% if request.endpoint == 'students' %}active{% endif %}">
+                    <i class='bx bxs-user'></i>
+                    <span>Students</span>
+                    <span class="nav-badge">48</span>
+                </a>
+                <a href="{{ url_for('teachers') }}" class="nav-item {% if request.endpoint == 'teachers' %}active{% endif %}">
+                    <i class='bx bxs-chalkboard'></i>
+                    <span>Teachers</span>
+                    <span class="nav-badge">12</span>
+                </a>
+                <a href="{{ url_for('classes') }}" class="nav-item {% if request.endpoint == 'classes' %}active{% endif %}">
+                    <i class='bx bxs-group'></i>
+                    <span>Classes</span>
+                    <span class="nav-badge">8</span>
+                </a>
+                <a href="{{ url_for('subjects') }}" class="nav-item {% if request.endpoint == 'subjects' %}active{% endif %}">
+                    <i class='bx bxs-book'></i>
+                    <span>Subjects</span>
+                    <span class="nav-badge">15</span>
+                </a>
+            </div>
+
+            <!-- SECTION FINANCE -->
+            <div class="nav-section">
+                <span class="section-label">FINANCE</span>
+                <a href="{{ url_for('fees') }}" class="nav-item {% if request.endpoint == 'fees' %}active{% endif %}">
+                    <i class='bx bxs-wallet'></i>
+                    <span>Fees</span>
+                    <span class="nav-badge badge-warning">3</span>
+                </a>
+            </div>
+
+            <!-- SECTION MANAGEMENT -->
+            <div class="nav-section">
+                <span class="section-label">MANAGEMENT</span>
+                <a href="{{ url_for('enrollments') }}" class="nav-item {% if request.endpoint == 'enrollments' %}active{% endif %}">
+                    <i class='bx bx-list-check'></i>
+                    <span>Enrollments</span>
+                    <span class="nav-badge">56</span>
+                </a>
+                <a href="{{ url_for('results') }}" class="nav-item {% if request.endpoint == 'results' %}active{% endif %}">
+                    <i class='bx bx-bar-chart-alt-2'></i>
+                    <span>Results</span>
+                    <span class="nav-badge">240</span>
+                </a>
+                <a href="{{ url_for('timetable') }}" class="nav-item {% if request.endpoint == 'timetable' %}active{% endif %}">
+                    <i class='bx bxs-calendar'></i>
+                    <span>Timetable</span>
+                </a>
+                <a href="{{ url_for('rooms') }}" class="nav-item {% if request.endpoint == 'rooms' %}active{% endif %}">
+                    <i class='bx bxs-door-open'></i>
+                    <span>Rooms</span>
+                    <span class="nav-badge">6</span>
+                </a>
+            </div>
+
+            <!-- SECTION ACCOUNT -->
+            <div class="nav-section">
+                <span class="section-label">ACCOUNT</span>
+                <a href="{{ url_for('profile') }}" class="nav-item {% if request.endpoint == 'profile' %}active{% endif %}">
+                    <i class='bx bxs-user-circle'></i>
+                    <span>Profile</span>
+                </a>
+                <a href="{{ url_for('settings') }}" class="nav-item {% if request.endpoint == 'settings' %}active{% endif %}">
+                    <i class='bx bxs-cog'></i>
+                    <span>Settings</span>
+                </a>
+                <a href="{{ url_for('logout') }}" class="nav-item logout">
+                    <i class='bx bx-log-out'></i>
+                    <span>Logout</span>
+                </a>
+            </div>
         </nav>
     </aside>
 
@@ -69,7 +121,7 @@
         <header class="topbar">
             <div class="topbar-left">
                 <div class="page-title">
-                    <h1>{% block page_heading %}{% endblock %}</h1>
+                    <!-- <h1>{% block page_heading %}{% endblock %}</h1>-->
                     <nav class="breadcrumb">
                         <a href="{{ url_for('dashboard') }}">Home</a>
                         <span class="divider">/</span>

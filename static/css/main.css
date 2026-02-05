@@ -6,9 +6,16 @@
 /* ===== VARIABLES GLOBALES ===== */
 :root {
   /* Couleurs principales - basées sur votre design */
-  --primary: #2563eb;       /* Bleu principal */
+  --primary: #ffcb62;       /* Bleu principal */
   --primary-dark: #1e4fd8;
   --primary-light: #3b82f6;
+
+
+
+    /* Gardez vos couleurs existantes et ajoutez : */
+    --login-primary: #ffd98e;
+    --login-bg: #102032;
+    --login-gradient: radial-gradient(ellipse at top left, #283647, #102032);
   
   /* Couleurs secondaires */
   --secondary: #10b981;     /* Vert */
@@ -607,4 +614,150 @@ body {
     display: block;
     overflow-x: auto;
   }
+}
+
+/* ===== SIDEBAR AMÉLIORÉE ===== */
+.sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 10px;
+}
+
+.sidebar-header .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar-header .logo i {
+    font-size: 28px;
+    color: #4f46e5;
+}
+
+.sidebar-header .logo h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+}
+
+.sidebar-header .logo span {
+    color: #9ca3af;
+    font-weight: 400;
+}
+
+.sidebar-nav {
+    padding: 0 15px;
+}
+
+.nav-section {
+    margin-bottom: 25px;
+}
+
+.section-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 12px;
+    padding-left: 10px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    margin-bottom: 4px;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.nav-item.active {
+    background: #4f46e5;
+    color: white;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+}
+
+.nav-item.active i {
+    color: white;
+}
+
+.nav-item i {
+    font-size: 18px;
+    width: 24px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.nav-item.active i {
+    color: white;
+}
+
+.nav-badge {
+    margin-left: auto;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    min-width: 24px;
+    text-align: center;
+}
+
+.nav-item.active .nav-badge {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+}
+
+.nav-item.logout {
+    color: #f87171;
+}
+
+.nav-item.logout:hover {
+    background: rgba(248, 113, 113, 0.1);
+    color: #fca5a5;
+}
+
+/* Animation pour les badges */
+@keyframes badgePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.nav-badge.badge-warning {
+    animation: badgePulse 2s infinite;
+}
+
+/* Responsive pour la sidebar */
+@media (max-width: 768px) {
+    .sidebar-header .logo h2 span {
+        display: none;
+    }
+    
+    .section-label {
+        font-size: 10px;
+        text-align: center;
+        padding-left: 0;
+    }
+    
+    .nav-item span:not(.nav-badge) {
+        font-size: 13px;
+    }
 }

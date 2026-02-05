@@ -202,7 +202,6 @@
     font-size: 14px;
 }
 
-/* Ajoutez dans components.css */
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));

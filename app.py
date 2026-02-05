@@ -62,33 +62,42 @@ def get_fee_status(total, paid):
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        # Vérifiez d'abord si les champs existent
-        username = request.form.get("username")
-        password = request.form.get("password")
+        # Récupérer les données du formulaire
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "").strip()
         
+        # Validation basique
         if not username or not password:
             flash("Please fill in all fields", "error")
             return render_template("login.html")
         
+        # Vérifier les identifiants
         conn = get_db_connection()
-        admin = conn.execute("SELECT * FROM admins WHERE username = ?", (username,)).fetchone()
+        admin = conn.execute(
+            "SELECT * FROM admins WHERE username = ?", 
+            (username,)
+        ).fetchone()
         conn.close()
-
+        
         if admin and check_password_hash(admin["password"], password):
+            # Connexion réussie
             session["admin_logged_in"] = True
             session["user_name"] = "Administrator"
             session["user_role"] = "Admin"
             flash("Login successful!", "success")
             return redirect(url_for("dashboard"))
         else:
-            flash("Invalid credentials", "error")
-            return render_template("login.html", error="Invalid credentials")
+            # Identifiants incorrects
+            flash("Invalid username or password", "error")
+            return render_template("login.html")
     
+    # GET request - afficher le formulaire
     return render_template("login.html")
 
 @app.route("/logout")
 def logout():
-    session.clear()
+    session.clear()  # Efface toutes les données de session
+    flash("You have been logged out successfully", "success")
     return redirect(url_for("login"))
 
 # ===== DASHBOARD =====

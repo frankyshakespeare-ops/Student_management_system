@@ -127,3 +127,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Dans main.js ou dans le script de base.html
+document.addEventListener('DOMContentLoaded', function() {
+    // Fonction pour mettre à jour les badges (exemple)
+    function updateNavBadges() {
+        // Vous pouvez récupérer ces données via une API ou les passer depuis Flask
+        // Pour l'instant, on garde les valeurs statiques
+        console.log("Navigation badges ready");
+    }
+    
+    // Badges interactifs
+    document.querySelectorAll('.nav-badge').forEach(badge => {
+        if (badge.classList.contains('badge-warning')) {
+            badge.addEventListener('click', function(e) {
+                e.stopPropagation();
+                alert('Pending items need attention!');
+            });
+        }
+    });
+    
+    updateNavBadges();
+});

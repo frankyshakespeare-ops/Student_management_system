@@ -1,149 +1,282 @@
-<!-- templates/login.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - School Management</title>
+    
+    <!-- Boxicons pour les icônes -->
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
     <style>
-        * {
+        /* Importation d'une police sans-serif moderne */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
             font-family: 'Inter', sans-serif;
-        }
-        
-        body {
-            background: #f6f7fb;
+            background-image: radial-gradient(ellipse at top left,#283647,#102032);
+            color: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            -webkit-font-smoothing: antialiased;
         }
-        
-        .login-container {
+
+        .container {
             width: 100%;
             max-width: 400px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            padding: 40px;
-        }
-        
-        .login-header {
+            padding: 20px;
             text-align: center;
-            margin-bottom: 30px;
         }
-        
-        .login-header h1 {
-            color: #2563eb;
-            font-size: 24px;
-            margin-bottom: 8px;
-        }
-        
-        .login-header p {
-            color: #6b7280;
-            font-size: 14px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 500;
-            color: #374151;
-            font-size: 14px;
-        }
-        
-        .form-group input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.2s;
-        }
-        
-        .form-group input:focus {
-            outline: none;
-            border-color: #2563eb;
-        }
-        
-        .btn-login {
-            width: 100%;
-            background: #2563eb;
+
+        /* Bouton Back en haut à gauche */
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: white;
-            border: none;
-            padding: 14px;
+            padding: 6px 14px;
             border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
+            font-size: 12px;
             cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 10px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s;
         }
-        
-        .btn-login:hover {
-            background: #1e4fd8;
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
         }
-        
-        .alert {
-            padding: 12px;
-            border-radius: 8px;
+
+        /* Nouveau Style Logo : 🎓 School */
+        .logo-school {
+            font-size: 32px;
+            font-weight: 600;
             margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            color: #9ca3af;
             font-size: 14px;
+            margin-bottom: 40px;
         }
-        
+
+        .subtitle a {
+            color: #ffd98e;
+            text-decoration: underline;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .subtitle a:hover {
+            color: #ffffff;
+        }
+
+        /* Styles des formulaires */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 80%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #ffffff;
+            box-sizing: border-box;
+            font-size: 15px;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        input::placeholder {
+            color: #9ca3af;
+        }
+
+        input:focus {
+            border: 1px solid #ffd98e;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        /* Bouton Sign in principal */
+        .btn-primary {
+            width: 80%;
+            padding: 14px;
+            background-color: #ffd98e;
+            color: #18212c;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: #ffd074;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Messages d'erreur/succès */
+        .alert {
+            width: 80%;
+            margin: 0 auto 20px auto;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: left;
+        }
+
         .alert-error {
-            background: #fee2e2;
-            color: #dc2626;
-            border: 1px solid #fca5a5;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #f87171;
         }
-        
+
         .alert-success {
-            background: #dcfce7;
-            color: #166534;
-            border: 1px solid #86efac;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+
+        .separator {
+            color: #4b5563;
+            font-size: 12px;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        /* Footer texte */
+        .footer-text {
+            color: #6b7280;
+            font-size: 11px;
+            line-height: 1.5;
+            padding: 0 20px;
+            margin-top: 30px;
+        }
+
+        .footer-text a {
+            color: #9ca3af;
+            text-decoration: underline;
+            transition: color 0.2s;
+        }
+
+        .footer-text a:hover {
+            color: #ffffff;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            input, .btn-primary {
+                width: 90%;
+            }
+            
+            .back-button {
+                top: 15px;
+                left: 15px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <h1>School Management</h1>
-            <p>Sign in to your account</p>
+
+<a href="#" class="back-button" onclick="history.back()">
+    <i class='bx bx-chevron-left'></i>
+    <span>Back</span>
+</a>
+
+<div class="container">
+    <div class="logo-school">
+        <span>🎓</span> School
+    </div>
+    
+    <h1>Welcome Back</h1>
+    <p class="subtitle">First time here? <a href="#">Sign up</a></p>
+    
+    <!-- Messages flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'error' if category == 'error' else 'success' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <!-- Formulaire de login -->
+    <form method="POST" action="{{ url_for('login') }}">
+        <div class="input-group">
+            <input type="text" name="username" placeholder="Username" required 
+                   value="{{ request.form.username if request.form }}">
+        </div>
+        <div class="input-group">
+            <input type="password" name="password" placeholder="••••••••" required>
         </div>
         
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'error' if category == 'error' else 'success' }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        <form method="POST" action="{{ url_for('login') }}">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required 
-                       placeholder="Enter your username">
-            </div>
-            
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required 
-                       placeholder="Enter your password">
-            </div>
-            
-            <button type="submit" class="btn-login">Sign In</button>
-        </form>
+        <button type="submit" class="btn-primary">
+            <i class='bx bx-log-in'></i> Sign in
+        </button>
+    </form>
+    
+    <div class="footer-text">
+        By signing in, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
     </div>
+</div>
+
+<script>
+// Animation d'entrée
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.querySelector('.container');
+    container.style.opacity = '0';
+    container.style.transform = 'translateY(20px)';
+    
+    setTimeout(() => {
+        container.style.transition = 'opacity 0.5s, transform 0.5s';
+        container.style.opacity = '1';
+        container.style.transform = 'translateY(0)';
+    }, 100);
+    
+    // Focus sur le champ username
+    const usernameField = document.querySelector('input[name="username"]');
+    if (usernameField) {
+        setTimeout(() => usernameField.focus(), 600);
+    }
+});
+</script>
+
 </body>
 </html>
