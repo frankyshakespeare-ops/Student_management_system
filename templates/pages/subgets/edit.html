@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block page_title %}Edit Subject{% endblock %}
+{% block page_heading %}Edit Subject{% endblock %}
+{% block breadcrumb %}Subjects / Edit{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">Edit Subject</div>
+    <div class="card-body">
+        <form method="POST">
+            <div style="max-width: 500px; margin: 0 auto;">
+                <div class="form-group">
+                    <label for="name">Subject Name</label>
+                    <input type="text" id="name" name="name" 
+                           value="{{ subject.name }}" required
+                           class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="coefficient">Coefficient</label>
+                    <input type="number" id="coefficient" name="coefficient" 
+                           value="{{ subject.coefficient }}" required min="1" max="10"
+                           class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="class_id">Class (Optional)</label>
+                    <select id="class_id" name="class_id" class="form-control">
+                        <option value="">Select a class (optional)</option>
+                        {% for class in classes %}
+                        <option value="{{ class.id }}" 
+                                {% if subject.class_id == class.id %}selected{% endif %}>
+                            {{ class.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class='bx bx-save'></i> Update Subject
+                    </button>
+                    <a href="{{ url_for('subjects') }}" class="btn btn-secondary">
+                        <i class='bx bx-x'></i> Cancel
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+</style>
+
+{% endblock %}

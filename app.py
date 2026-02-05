@@ -94,6 +94,7 @@ def login():
     # GET request - afficher le formulaire
     return render_template("login.html")
 
+# ----- logout -----
 @app.route("/logout")
 def logout():
     session.clear()  # Efface toutes les données de session
@@ -150,6 +151,7 @@ def students():
                          page_title="Students",
                          page_heading="Students")
 
+# ----- add students -----
 @app.route("/students/add", methods=["GET", "POST"])
 @login_required
 def add_student():
@@ -170,6 +172,7 @@ def add_student():
         return redirect(url_for("students"))
     return render_template("add_student.html", page_title="Add Student")
 
+# ----- edit students -----
 @app.route("/students/edit/<int:id>", methods=["GET", "POST"])
 @login_required
 def edit_student(id):
@@ -202,6 +205,7 @@ def edit_student(id):
                          student=student,
                          page_title="Edit Student")
 
+# ----- delete students -----
 @app.route("/students/delete/<int:id>")
 @login_required
 def delete_student(id):
@@ -224,6 +228,7 @@ def teachers():
                          page_title="Teachers",
                          page_heading="Teachers")
 
+# ----- add teachers -----
 @app.route("/teachers/add", methods=["GET", "POST"])
 @login_required
 def add_teacher():
@@ -246,6 +251,7 @@ def add_teacher():
         return redirect(url_for("teachers"))
     return render_template("add_teacher.html", page_title="Add Teacher")
 
+# ----- edit teachers -----
 @app.route("/teachers/edit/<int:id>", methods=["GET", "POST"])
 @login_required
 def edit_teacher(id):
@@ -281,6 +287,7 @@ def edit_teacher(id):
                          teacher=teacher,
                          page_title="Edit Teacher")
 
+# ----- delete teachers -----
 @app.route("/teachers/delete/<int:id>")
 @login_required
 def delete_teacher(id):
@@ -291,6 +298,7 @@ def delete_teacher(id):
     flash("Teacher deleted successfully!", "success")
     return redirect(url_for("teachers"))
 
+# ===== DEBUG ROUTES =====
 @app.route("/debug/tables")
 @login_required
 def debug_tables():
@@ -327,6 +335,7 @@ def classes():
                          page_title="Classes",
                          page_heading="Classes")
 
+# ---- add classes -----
 @app.route("/classes/add", methods=["GET", "POST"])
 @login_required
 def add_class():
@@ -345,6 +354,7 @@ def add_class():
         return redirect(url_for("classes"))
     return render_template("add_class.html", page_title="Add Class")
 
+# ----- edit classes -----
 @app.route("/classes/edit/<int:id>", methods=["GET", "POST"])
 @login_required
 def edit_class(id):
@@ -375,6 +385,7 @@ def edit_class(id):
                          class_data=class_data,
                          page_title="Edit Class")
 
+# ----- delete classes -----
 @app.route("/classes/delete/<int:id>")
 @login_required
 def delete_class(id):
@@ -405,6 +416,7 @@ def subjects():
                          page_title="Subjects",
                          page_heading="Subjects")
 
+# ---- add subject -----
 @app.route("/subjects/add", methods=["GET", "POST"])
 @login_required
 def add_subject():
@@ -430,6 +442,72 @@ def add_subject():
                          classes=classes,
                          page_title="Add Subject")
 
+# ---- edit subject -----
+@app.route("/subjects/edit/<int:id>", methods=["GET", "POST"])
+@login_required
+def edit_subject(id):
+    conn = get_db_connection()
+    
+    if request.method == "POST":
+        # Récupérer les données du formulaire
+        name = request.form.get("name")
+        coefficient = request.form.get("coefficient")
+        class_id = request.form.get("class_id") or None
+        
+        # Mettre à jour la matière
+        conn.execute("""
+            UPDATE subjects 
+            SET name = ?, coefficient = ?, class_id = ?
+            WHERE id = ?
+        """, (name, coefficient, class_id, id))
+        
+        conn.commit()
+        conn.close()
+        flash("Subject updated successfully!", "success")
+        return redirect(url_for("subjects"))
+    
+    # GET request - afficher le formulaire d'édition
+    subject = conn.execute("""
+        SELECT s.*, c.name as class_name 
+        FROM subjects s
+        LEFT JOIN classes c ON s.class_id = c.id
+        WHERE s.id = ?
+    """, (id,)).fetchone()
+    
+    classes = conn.execute("SELECT id, name FROM classes").fetchall()
+    conn.close()
+    
+    if not subject:
+        flash("Subject not found", "error")
+        return redirect(url_for("subjects"))
+    
+    return render_template("edit_subject.html",
+                         subject=subject,
+                         classes=classes,
+                         page_title="Edit Subject")
+
+# ---- delete subject -----
+@app.route("/subjects/delete/<int:id>")
+@login_required
+def delete_subject(id):
+    conn = get_db_connection()
+    
+    # Vérifie d'abord si la matière existe
+    subject = conn.execute("SELECT * FROM subjects WHERE id = ?", (id,)).fetchone()
+    
+    if not subject:
+        conn.close()
+        flash("Subject not found", "error")
+        return redirect(url_for("subjects"))
+    
+    # Supprimer la matière
+    conn.execute("DELETE FROM subjects WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+    
+    flash("Subject deleted successfully!", "success")
+    return redirect(url_for("subjects"))
+
 # ===== ENROLLMENTS ROUTES =====
 @app.route("/enrollments")
 @login_required
@@ -451,6 +529,7 @@ def enrollments():
                          page_title="Enrollments",
                          page_heading="Enrollments")
 
+# ---- add enrollment -----
 @app.route("/enrollments/add", methods=["GET", "POST"])
 @login_required
 def add_enrollment():
@@ -478,6 +557,26 @@ def add_enrollment():
                          classes=classes,
                          page_title="Add Enrollment")
 
+# ---- delete enrollment -----
+@app.route("/enrollments/delete/<int:id>")
+@login_required
+def delete_enrollment(id):
+    conn = get_db_connection()
+    conn.execute("DELETE FROM enrollments WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+    flash("Enrollment deleted successfully!", "success")
+    return redirect(url_for("enrollments"))
+
+# ---- edit enrollment -----
+@app.route("/enrollments/edit/<int:id>")
+@login_required
+def edit_enrollment(id):
+    # Version simple - redirige vers la page d'ajout pour l'instant
+    flash("Edit feature coming soon!", "info")
+    return redirect(url_for("enrollments"))
+
+
 # ===== RESULTS ROUTES =====
 @app.route("/results")
 @login_required
@@ -501,6 +600,7 @@ def results():
                          page_title="Results",
                          page_heading="Results")
 
+# ---- add result -----
 @app.route("/results/add", methods=["GET", "POST"])
 @login_required
 def add_result():
@@ -534,6 +634,25 @@ def add_result():
                          subjects=subjects,
                          page_title="Add Result")
 
+# ---- edit result -----
+@app.route("/results/edit/<int:id>")
+@login_required
+def edit_result(id):
+    flash("Edit feature coming soon!", "info")
+    return redirect(url_for("results"))
+
+# ---- delete result -----
+@app.route("/results/delete/<int:id>")
+@login_required
+def delete_result(id):
+    conn = get_db_connection()
+    conn.execute("DELETE FROM results WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+    flash("Result deleted successfully!", "success")
+    return redirect(url_for("results"))
+
+
 # ===== FEES ROUTES =====
 @app.route("/fees")
 @login_required
@@ -563,6 +682,7 @@ def fees():
                          page_title="Fees",
                          page_heading="Fees")
 
+# ---- add fee -----
 @app.route("/fees/add", methods=["GET", "POST"])
 @login_required
 def add_fee():
@@ -598,6 +718,25 @@ def add_fee():
                          classes=classes,
                          page_title="Add Fee")
 
+# ---- edit fee -----
+@app.route("/fees/edit/<int:id>")
+@login_required
+def edit_fee(id):
+    flash("Edit feature coming soon!", "info")
+    return redirect(url_for("fees"))
+
+# ---- delete fee -----
+@app.route("/fees/delete/<int:id>")
+@login_required
+def delete_fee(id):
+    conn = get_db_connection()
+    conn.execute("DELETE FROM fees WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+    flash("Fee record deleted successfully!", "success")
+    return redirect(url_for("fees"))
+
+
 # ===== ROOMS ROUTES =====
 @app.route("/rooms")
 @login_required
@@ -610,6 +749,7 @@ def rooms():
                          page_title="Rooms",
                          page_heading="Rooms")
 
+# ---- add room -----
 @app.route("/rooms/add", methods=["GET", "POST"])
 @login_required
 def add_room():
@@ -629,6 +769,25 @@ def add_room():
         return redirect(url_for("rooms"))
 
     return render_template("add_room.html", page_title="Add Room")
+
+# --- delete room -----
+@app.route("/rooms/delete/<int:id>")
+@login_required
+def delete_room(id):
+    conn = get_db_connection()
+    conn.execute("DELETE FROM rooms WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+    flash("Room deleted successfully!", "success")
+    return redirect(url_for("rooms"))
+
+# --- edit room -----
+@app.route("/rooms/edit/<int:id>")
+@login_required
+def edit_room(id):
+    flash("Edit feature coming soon!", "info")
+    return redirect(url_for("rooms"))
+
 
 # ===== TIMETABLE ROUTES =====
 @app.route("/timetable")
@@ -674,6 +833,7 @@ def timetable():
                          page_title="Timetable",
                          page_heading="Timetable")
 
+# ---- add timetable entry -----
 @app.route("/timetable/add", methods=["GET", "POST"])
 @login_required
 def add_timetable():
@@ -712,6 +872,25 @@ def add_timetable():
         rooms=rooms,
         page_title="Add Timetable"
     )
+
+# ---- edit timetable entry -----
+@app.route("/timetable/edit/<int:id>")
+@login_required
+def edit_timetable(id):
+    flash("Edit feature coming soon!", "info")
+    return redirect(url_for("timetable"))
+
+# --- delete timetable entry -----
+@app.route("/timetable/delete/<int:id>")
+@login_required
+def delete_timetable(id):
+    conn = get_db_connection()
+    conn.execute("DELETE FROM timetable WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+    flash("Timetable entry deleted successfully!", "success")
+    return redirect(url_for("timetable"))
+
 
 # ===== BULLETIN =====
 @app.route("/bulletin/<int:enrollment_id>")
@@ -777,13 +956,14 @@ def profile():
                          page_title="My Profile",
                          page_heading="My Profile")
 
+# ---- settings -----
 @app.route('/settings')
 @login_required
 def settings():
     return render_template('settings.html',
                          page_title="Settings",
                          page_heading="Settings")
-
+# ---- help -----
 @app.route('/help')
 @login_required
 def help_page():
