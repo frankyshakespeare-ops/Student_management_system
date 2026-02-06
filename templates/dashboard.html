@@ -7,186 +7,511 @@
 {% block content %}
 
 <div class="dashboard-grid">
-    <!-- Stats Cards -->
+    <!-- STATS CARDS -->
     <div class="stats-card">
-        <div class="stats-icon" style="background: #e0f2fe;">
+        <div class="stats-icon students">
             <i class='bx bxs-graduation'></i>
         </div>
         <div class="stats-content">
             <h3>{{ students_count|default(0) }}</h3>
             <p>Total Students</p>
+            <div class="stats-trend">
+                <i class='bx bx-up-arrow-alt'></i>
+                <span>+{{ new_students_this_month|default(5) }} this month</span>
+            </div>
         </div>
     </div>
 
     <div class="stats-card">
-        <div class="stats-icon" style="background: #f0f9ff;">
+        <div class="stats-icon teachers">
             <i class='bx bxs-user-badge'></i>
         </div>
         <div class="stats-content">
             <h3>{{ teachers_count|default(0) }}</h3>
             <p>Total Teachers</p>
+            <div class="stats-trend">
+                <i class='bx bx-group'></i>
+                <span>{{ subjects_count|default(15) }} subjects taught</span>
+            </div>
         </div>
     </div>
 
     <div class="stats-card">
-        <div class="stats-icon" style="background: #fef3c7;">
-            <i class='bx bxs-group'></i>
+        <div class="stats-icon classes">
+            <i class='bx bxs-school'></i>
         </div>
         <div class="stats-content">
             <h3>{{ classes_count|default(0) }}</h3>
-            <p>Total Classes</p>
+            <p>Active Classes</p>
+            <div class="stats-trend">
+                <i class='bx bx-user-voice'></i>
+                <span>{{ avg_class_size|default(24) }} avg. students</span>
+            </div>
         </div>
     </div>
 
     <div class="stats-card">
-        <div class="stats-icon" style="background: #fee2e2;">
+        <div class="stats-icon finance">
             <i class='bx bxs-wallet'></i>
         </div>
         <div class="stats-content">
-            <h3>{{ pending_fees|default(0) }}</h3>
-            <p>Pending Fees</p>
+            <h3>${{ total_fees|default('0')|int }}</h3>
+            <p>Total Fees</p>
+            <div class="stats-trend {% if pending_fees > 0 %}warning{% endif %}">
+                <i class='bx {% if pending_fees > 0 %}bx-error-alt{% else %}bx-check-circle{% endif %}'></i>
+                <span>{{ pending_fees|default(0) }} pending</span>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Recent Enrollments -->
-<div class="card">
-    <div class="card-header">
-        <h2>Recent Enrollments</h2>
-        <a href="{{ url_for('enrollments') }}" class="btn btn-sm btn-secondary">View All</a>
-    </div>
-    <div class="card-body">
-        <!--<div class="table-container">-->
-        {% if recent_enrollments and recent_enrollments|length > 0 %}
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Student</th>
-                    <th>Class</th>
-                    <th>Academic Year</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for enrollment in recent_enrollments %}
-                <tr>
-                    <td class="user-cell">
-                        <img src="https://i.pravatar.cc/40?u={{ enrollment.id }}" 
-                             alt="{{ enrollment.student_name }}">
-                        <span>{{ enrollment.student_name }}</span>
-                    </td>
-                    <td>{{ enrollment.class_name }}</td>
-                    <td>{{ enrollment.academic_year }}</td>
-                    <td>
-                        <span class="badge badge-success">Active</span>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <div class="empty-state">
-            <i class='bx bx-list-check'></i>
-            <p>No recent enrollments found</p>
+    <!-- RECENT ENROLLMENTS -->
+    <div class="dashboard-card full-width">
+        <div class="card-header">
+            <h2><i class='bx bxs-list-check'></i> Recent Enrollments</h2>
+            <a href="{{ url_for('enrollments') }}" class="btn btn-sm btn-secondary">View All</a>
         </div>
-        {% endif %}
+        <div class="card-body">
+            {% if recent_enrollments and recent_enrollments|length > 0 %}
+            <div class="table-scrollable">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Class</th>
+                            <th>Academic Year</th>
+                            <th>Enrollment Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enrollment in recent_enrollments %}
+                        <tr>
+                            <td class="user-cell">
+                                <img src="https://i.pravatar.cc/40?u={{ enrollment.id }}" 
+                                     alt="{{ enrollment.student_name }}">
+                                <span>{{ enrollment.student_name }}</span>
+                            </td>
+                            <td>{{ enrollment.class_name }}</td>
+                            <td>{{ enrollment.academic_year }}</td>
+                            <td>{{ enrollment.enrollment_date|default('Today') }}</td>
+                            <td>
+                                <span class="badge badge-success">Active</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class='bx bx-list-check'></i>
+                <p>No recent enrollments</p>
+            </div>
+            {% endif %}
+        </div>
     </div>
-</div>
 
-<!-- Quick Actions -->
-<div class="card">
-    <div class="card-header">
-        <h2>Quick Actions</h2>
+    <!-- FEE STATUS -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h2><i class='bx bxs-wallet'></i> Fee Status</h2>
+        </div>
+        <div class="card-body">
+            <div class="fee-stats">
+                <div class="fee-stat">
+                    <div class="fee-amount paid">${{ paid_fees|default('0')|int }}</div>
+                    <div class="fee-label">Paid</div>
+                </div>
+                <div class="fee-stat">
+                    <div class="fee-amount pending">${{ pending_amount|default('0')|int }}</div>
+                    <div class="fee-label">Pending</div>
+                </div>
+                <div class="fee-stat">
+                    <div class="fee-amount total">${{ total_fees_amount|default('0')|int }}</div>
+                    <div class="fee-label">Total</div>
+                </div>
+            </div>
+            
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span>Collection Rate</span>
+                    <span>{{ collection_rate|default(85) }}%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ collection_rate|default(85) }}%"></div>
+                </div>
+            </div>
+            
+            <a href="{{ url_for('fees') }}" class="btn btn-primary btn-block" style="margin-top: 20px;">
+                <i class='bx bx-money'></i> Manage Fees
+            </a>
+        </div>
     </div>
-    <div class="card-body">
-        <div class="quick-actions-grid">
-            <a href="{{ url_for('add_student') }}" class="quick-action">
-                <i class='bx bx-user-plus'></i>
-                <span>Add Student</span>
-            </a>
-            <a href="{{ url_for('add_teacher') }}" class="quick-action">
-                <i class='bx bx-user-plus'></i>
-                <span>Add Teacher</span>
-            </a>
-            <a href="{{ url_for('add_fee') }}" class="quick-action">
-                <i class='bx bx-money'></i>
-                <span>Add Fee</span>
-            </a>
-            <a href="{{ url_for('add_enrollment') }}" class="quick-action">
-                <i class='bx bx-list-plus'></i>
-                <span>Add Enrollment</span>
-            </a>
-            <a href="{{ url_for('add_result') }}" class="quick-action">
-                <i class='bx bx-bar-chart-alt-2'></i>
-                <span>Add Result</span>
-            </a>
-            <a href="{{ url_for('add_timetable') }}" class="quick-action">
-                <i class='bx bx-calendar-plus'></i>
-                <span>Add Schedule</span>
-            </a>
+
+    <!-- QUICK STATS -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h2><i class='bx bxs-dashboard'></i> Quick Stats</h2>
+        </div>
+        <div class="card-body">
+            <div class="quick-stats">
+                <div class="quick-stat">
+                    <i class='bx bxs-calendar'></i>
+                    <div>
+                        <h4>{{ timetable_count|default(0) }}</h4>
+                        <p>Schedule Entries</p>
+                    </div>
+                </div>
+                <div class="quick-stat">
+                    <i class='bx bxs-door-open'></i>
+                    <div>
+                        <h4>{{ rooms_count|default(0) }}</h4>
+                        <p>Available Rooms</p>
+                    </div>
+                </div>
+                <div class="quick-stat">
+                    <i class='bx bxs-bar-chart'></i>
+                    <div>
+                        <h4>{{ results_count|default(0) }}</h4>
+                        <p>Results Recorded</p>
+                    </div>
+                </div>
+                <div class="quick-stat">
+                    <i class='bx bxs-book'></i>
+                    <div>
+                        <h4>{{ subjects_count|default(0) }}</h4>
+                        <p>Subjects</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <a href="{{ url_for('add_student') }}" class="quick-action">
+                    <i class='bx bx-user-plus'></i>
+                    <span>Add Student</span>
+                </a>
+                <a href="{{ url_for('add_fee') }}" class="quick-action">
+                    <i class='bx bx-money'></i>
+                    <span>Add Fee</span>
+                </a>
+                <a href="{{ url_for('add_enrollment') }}" class="quick-action">
+                    <i class='bx bx-list-plus'></i>
+                    <span>Add Enrollment</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- UPCOMING EVENTS / ACTIVITY -->
+    <div class="dashboard-card">
+        <div class="card-header">
+            <h2><i class='bx bxs-calendar-event'></i> Recent Activity</h2>
+        </div>
+        <div class="card-body">
+            <div class="activity-list">
+                {% if recent_activity %}
+                    {% for activity in recent_activity %}
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            {% if activity.type == 'student' %}
+                            <i class='bx bxs-user'></i>
+                            {% elif activity.type == 'fee' %}
+                            <i class='bx bxs-wallet'></i>
+                            {% elif activity.type == 'result' %}
+                            <i class='bx bxs-bar-chart'></i>
+                            {% else %}
+                            <i class='bx bxs-bell'></i>
+                            {% endif %}
+                        </div>
+                        <div class="activity-content">
+                            <p>{{ activity.message }}</p>
+                            <span class="activity-time">{{ activity.time }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class='bx bxs-bell'></i>
+                        </div>
+                        <div class="activity-content">
+                            <p>Welcome to School Management System!</p>
+                            <span class="activity-time">Just now</span>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class='bx bxs-user'></i>
+                        </div>
+                        <div class="activity-content">
+                            <p>Start by adding your first student</p>
+                            <span class="activity-time">Today</span>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
 
 <style>
-/* Dashboard Grid */
+/* ===== DASHBOARD STYLES ===== */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
 }
 
 .stats-card {
-    background: white;
-    border-radius: 12px;
+    background: var(--white);
+    border-radius: var(--radius-lg);
     padding: 1.5rem;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    border: 1px solid #e5e7eb;
-    transition: transform 0.2s, box-shadow 0.2s;
+    gap: 1.25rem;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--gray-300);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
 .stats-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl);
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
 }
 
 .stats-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
+    width: 70px;
+    height: 70px;
+    border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 2rem;
+    color: var(--white);
     flex-shrink: 0;
 }
 
-.stats-icon i {
-    font-size: 28px;
-    color: white;
+.stats-icon.students {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.stats-icon.teachers {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+}
+
+.stats-icon.classes {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+.stats-icon.finance {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
 }
 
 .stats-content h3 {
-    font-size: 28px;
+    font-size: 2rem;
     font-weight: 700;
-    color: #111827;
+    color: var(--dark);
     margin-bottom: 0.25rem;
     line-height: 1;
 }
 
 .stats-content p {
-    font-size: 14px;
-    color: #6b7280;
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin-bottom: 0.5rem;
+}
+
+.stats-trend {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    color: var(--success);
+    font-weight: 500;
+}
+
+.stats-trend.warning {
+    color: var(--warning);
+}
+
+.stats-trend i {
+    font-size: 1rem;
+}
+
+/* Dashboard Cards */
+.dashboard-card {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--gray-300);
+    overflow: hidden;
+}
+
+.dashboard-card.full-width {
+    grid-column: 1 / -1;
+}
+
+.dashboard-card .card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--gray-300);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dashboard-card .card-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--dark);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+}
+
+.dashboard-card .card-body {
+    padding: 1.5rem;
+}
+
+/* Table Scrollable */
+.table-scrollable {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+}
+
+.table-scrollable table {
+    margin-bottom: 0;
+}
+
+.table-scrollable thead {
+    position: sticky;
+    top: 0;
+    background: var(--gray-100);
+    z-index: 10;
+}
+
+/* Fee Stats */
+.fee-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.fee-stat {
+    text-align: center;
+    padding: 1rem;
+    background: var(--gray-100);
+    border-radius: var(--radius);
+}
+
+.fee-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.fee-amount.paid {
+    color: var(--success);
+}
+
+.fee-amount.pending {
+    color: var(--warning);
+}
+
+.fee-amount.total {
+    color: var(--primary);
+}
+
+.fee-label {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+}
+
+/* Progress Bar */
+.progress-container {
+    margin-top: 1.5rem;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--gray-700);
+}
+
+.progress-bar {
+    height: 8px;
+    background: var(--gray-300);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    border-radius: 4px;
+    transition: width 1s ease;
+}
+
+/* Quick Stats */
+.quick-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.quick-stat {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: var(--gray-100);
+    border-radius: var(--radius);
+}
+
+.quick-stat i {
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+.quick-stat h4 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin: 0;
+    line-height: 1;
+}
+
+.quick-stat p {
+    font-size: 0.75rem;
+    color: var(--gray-600);
+    margin: 0;
 }
 
 /* Quick Actions */
-.quick-actions-grid {
+.quick-actions {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-top: 1.5rem;
 }
 
 .quick-action {
@@ -194,55 +519,177 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 1.5rem 1rem;
-    background: #f9fafb;
-    border-radius: 10px;
+    padding: 1rem 0.5rem;
+    background: var(--gray-100);
+    border-radius: var(--radius);
     text-decoration: none;
-    color: #374151;
+    color: var(--gray-700);
     transition: all 0.2s;
     border: 1px solid transparent;
 }
 
 .quick-action:hover {
-    background: white;
-    border-color: #e5e7eb;
-    color: #111827;
+    background: var(--white);
+    border-color: var(--primary);
+    color: var(--primary);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .quick-action i {
-    font-size: 32px;
-    margin-bottom: 0.75rem;
-    color: #4f46e5;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
 }
 
 .quick-action span {
-    font-size: 14px;
+    font-size: 0.75rem;
     font-weight: 500;
     text-align: center;
 }
 
+/* Activity List */
+.activity-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-content p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--gray-800);
+    line-height: 1.4;
+}
+
+.activity-time {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    margin-top: 0.25rem;
+    display: block;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: var(--gray-500);
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.empty-state p {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
     .dashboard-grid {
         grid-template-columns: repeat(2, 1fr);
     }
     
-    .quick-actions-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .dashboard-card.full-width {
+        grid-column: 1 / -1;
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
     .dashboard-grid {
         grid-template-columns: 1fr;
     }
     
-    .quick-actions-grid {
+    .fee-stats,
+    .quick-stats,
+    .quick-actions {
         grid-template-columns: 1fr;
+    }
+    
+    .stats-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .stats-content h3 {
+        font-size: 1.75rem;
     }
 }
 </style>
+
+<script>
+// Animation for dashboard elements
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate stats cards
+    const statsCards = document.querySelectorAll('.stats-card');
+    statsCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Animate progress bar
+    const progressFill = document.querySelector('.progress-fill');
+    if (progressFill) {
+        const width = progressFill.style.width;
+        progressFill.style.width = '0';
+        
+        setTimeout(() => {
+            progressFill.style.transition = 'width 1.5s ease';
+            progressFill.style.width = width;
+        }, 500);
+    }
+    
+    // Update time for activity items
+    function updateRelativeTimes() {
+        const timeElements = document.querySelectorAll('.activity-time');
+        timeElements.forEach(el => {
+            if (el.textContent === 'Just now' || el.textContent === 'Today') {
+                return;
+            }
+            // You could add relative time calculation here
+        });
+    }
+    
+    // Auto-refresh dashboard every 30 seconds (optional)
+    // setTimeout(() => {
+    //     window.location.reload();
+    // }, 30000);
+});
+</script>
 
 {% endblock %}
