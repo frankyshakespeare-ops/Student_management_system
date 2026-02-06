@@ -58,6 +58,14 @@ def get_fee_status(total, paid):
     else:
         return "Partial"
 
+# --- Home/Root ---
+@app.route("/")
+def home():
+    """Redirige vers login si non connecté, sinon vers dashboard"""
+    if session.get("admin_logged_in"):
+        return redirect(url_for("login"))
+    return redirect(url_for("dashboard"))
+
 # ===== AUTH ROUTES =====
 @app.route("/login", methods=["GET", "POST"])
 def login():

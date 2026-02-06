@@ -761,3 +761,56 @@ body {
         font-size: 13px;
     }
 }
+
+/* ===== TABLEAUX AVEC SCROLL INTERNE ===== */
+.table-container {
+    max-height: 600px; /* ou la hauteur que vous voulez */
+    overflow-y: auto;
+    border: 0px solid var(--gray-300);
+    border-radius: var(--radius);
+    margin-top: -20px;
+}
+
+/* Pour que l'en-tête du tableau reste fixe */
+.table-container table {
+    margin-bottom: 0;
+}
+
+.table-container thead {
+    position: sticky;
+    top: 0;
+    background: var(--gray-100);
+    z-index: 10;
+    box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+}
+
+/* Alternative : Scroll seulement sur mobile */
+@media (max-width: 768px) {
+    .table-responsive {
+        overflow-x: auto;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+}
+
+/* Hauteur automatique basée sur la fenêtre */
+.table-container {
+    max-height: calc(100vh - 300px); /* S'adapte à la hauteur de la fenêtre */
+    min-height: 770px; /* Hauteur minimum */
+    overflow-y: auto;
+}
+
+/* Pour garder les en-têtes visibles */
+.fixed-header-table {
+    height: 500px;
+    overflow-y: auto;
+}
+
+.fixed-header-table thead th {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 10;
+    border-bottom: 2px solid #dee2e6;
+}
+
