@@ -164,20 +164,34 @@ def students():
 @login_required
 def add_student():
     if request.method == "POST":
-        name = request.form["name"]
-        matricule = request.form["matricule"]
-        dob = request.form["date_of_birth"]
-        gender = request.form["gender"]
-
+        name = request.form.get("name")
+        matricule = request.form.get("matricule")
+        date_of_birth = request.form.get("date_of_birth") or None
+        gender = request.form.get("gender") or None
+        
         conn = get_db_connection()
-        conn.execute(
-            "INSERT INTO students (name, matricule, date_of_birth, gender) VALUES (?, ?, ?, ?)",
-            (name, matricule, dob, gender),
-        )
+        
+        # Vérifier si le matricule existe déjà
+        existing = conn.execute(
+            "SELECT id FROM students WHERE matricule = ?", 
+            (matricule,)
+        ).fetchone()
+        
+        if existing:
+            conn.close()
+            flash("Matricule number already exists!", "error")
+            return redirect(url_for("add_student"))
+        
+        conn.execute("""
+            INSERT INTO students (name, matricule, date_of_birth, gender)
+            VALUES (?, ?, ?, ?)
+        """, (name, matricule, date_of_birth, gender))
+        
         conn.commit()
         conn.close()
         flash("Student added successfully!", "success")
         return redirect(url_for("students"))
+    
     return render_template("add_student.html", page_title="Add Student")
 
 # ----- edit students -----
@@ -241,22 +255,26 @@ def teachers():
 @login_required
 def add_teacher():
     if request.method == "POST":
-        first_name = request.form["first_name"]
-        last_name = request.form["last_name"]
-        phone = request.form["phone"]
-        profession = request.form["profession"]
-        diploma = request.form["diploma"]
-        country = request.form["country"]
-
+        first_name = request.form.get("first_name")
+        last_name = request.form.get("last_name")
+        phone = request.form.get("phone", "")
+        profession = request.form.get("profession", "")
+        diploma = request.form.get("diploma", "")
+        country = request.form.get("country", "")
+        # photo = request.files.get("photo")  # Si vous gérez les uploads
+        
         conn = get_db_connection()
         conn.execute("""
-            INSERT INTO teachers (first_name, last_name, phone, profession, diploma, country)
+            INSERT INTO teachers 
+            (first_name, last_name, phone, profession, diploma, country) 
             VALUES (?, ?, ?, ?, ?, ?)
         """, (first_name, last_name, phone, profession, diploma, country))
+        
         conn.commit()
         conn.close()
         flash("Teacher added successfully!", "success")
         return redirect(url_for("teachers"))
+    
     return render_template("add_teacher.html", page_title="Add Teacher")
 
 # ----- edit teachers -----
@@ -348,19 +366,37 @@ def classes():
 @login_required
 def add_class():
     if request.method == "POST":
-        name = request.form["name"]
-        level = request.form["level"]
-
+        name = request.form.get("name")
+        level = request.form.get("level")
+        
         conn = get_db_connection()
-        conn.execute(
-            "INSERT INTO classes (name, level) VALUES (?, ?)",
+        
+        # Vérifier si la classe existe déjà
+        existing = conn.execute(
+            "SELECT id FROM classes WHERE name = ? AND level = ?", 
             (name, level)
-        )
+        ).fetchone()
+        
+        if existing:
+            conn.close()
+            flash("A class with this name and level already exists!", "error")
+            return redirect(url_for("add_class"))
+        
+        conn.execute("""
+            INSERT INTO classes (name, level)
+            VALUES (?, ?)
+        """, (name, level))
+        
         conn.commit()
         conn.close()
-        flash("Class added successfully!", "success")
+        flash(f"Class '{name}' created successfully!", "success")
         return redirect(url_for("classes"))
-    return render_template("add_class.html", page_title="Add Class")
+    
+    # Passer l'année courante pour l'affichage
+    current_year = datetime.now().year
+    return render_template("add_class.html", 
+                         page_title="Add Class",
+                         current_year=current_year)
 
 # ----- edit classes -----
 @app.route("/classes/edit/<int:id>", methods=["GET", "POST"])
@@ -429,26 +465,32 @@ def subjects():
 @login_required
 def add_subject():
     conn = get_db_connection()
-    classes = conn.execute("SELECT id, name FROM classes").fetchall()
-
+    
     if request.method == "POST":
-        name = request.form["name"]
-        coefficient = request.form["coefficient"]
-        class_id = request.form["class_id"] if request.form["class_id"] else None
-
-        conn.execute(
-            "INSERT INTO subjects (name, coefficient, class_id) VALUES (?, ?, ?)",
-            (name, coefficient, class_id)
-        )
+        name = request.form.get("name")
+        coefficient = request.form.get("coefficient")
+        class_id = request.form.get("class_id") or None
+        teacher_id = request.form.get("teacher_id") or None
+        
+        conn.execute("""
+            INSERT INTO subjects (name, coefficient, class_id, teacher_id)
+            VALUES (?, ?, ?, ?)
+        """, (name, coefficient, class_id, teacher_id))
+        
         conn.commit()
         conn.close()
-        flash("Subject added successfully!", "success")
+        flash(f"Subject '{name}' created successfully!", "success")
         return redirect(url_for("subjects"))
-
+    
+    # Récupérer les données pour les dropdowns
+    classes = conn.execute("SELECT id, name, level FROM classes ORDER BY name").fetchall()
+    teachers = conn.execute("SELECT id, first_name, last_name FROM teachers ORDER BY first_name").fetchall()
     conn.close()
+    
     return render_template("add_subject.html", 
+                         page_title="Add Subject",
                          classes=classes,
-                         page_title="Add Subject")
+                         teachers=teachers)
 
 # ---- edit subject -----
 @app.route("/subjects/edit/<int:id>", methods=["GET", "POST"])
@@ -613,34 +655,53 @@ def results():
 @login_required
 def add_result():
     conn = get_db_connection()
-    enrollments = conn.execute("""
-        SELECT e.id, s.name || ' - ' || c.name || ' (' || e.academic_year || ')' AS label
-        FROM enrollments e
-        JOIN students s ON e.student_id = s.id
-        JOIN classes c ON e.class_id = c.id
-    """).fetchall()
-    subjects = conn.execute("SELECT id, name FROM subjects").fetchall()
-
+    
     if request.method == "POST":
-        enrollment_id = request.form["enrollment_id"]
-        subject_id = request.form["subject_id"]
-        score = request.form["score"]
-        semester = request.form["semester"]
-
-        conn.execute(
-            "INSERT INTO results (enrollment_id, subject_id, score, semester) VALUES (?, ?, ?, ?)",
-            (enrollment_id, subject_id, score, semester)
-        )
+        enrollment_id = request.form.get("enrollment_id")
+        subject_id = request.form.get("subject_id")
+        score = float(request.form.get("score"))
+        semester = int(request.form.get("semester", 1))
+        
+        # Vérifier si le résultat existe déjà
+        existing = conn.execute("""
+            SELECT id FROM results 
+            WHERE enrollment_id = ? AND subject_id = ? AND semester = ?
+        """, (enrollment_id, subject_id, semester)).fetchone()
+        
+        if existing:
+            conn.close()
+            flash("Result for this student/subject/semester already exists!", "error")
+            return redirect(url_for("add_result"))
+        
+        conn.execute("""
+            INSERT INTO results (enrollment_id, subject_id, score, semester)
+            VALUES (?, ?, ?, ?)
+        """, (enrollment_id, subject_id, score, semester))
+        
         conn.commit()
         conn.close()
         flash("Result added successfully!", "success")
         return redirect(url_for("results"))
-
+    
+    # Récupérer les données pour les dropdowns
+    enrollments = conn.execute("""
+        SELECT e.id, s.name as student_name, c.name as class_name, e.academic_year
+        FROM enrollments e
+        JOIN students s ON e.student_id = s.id
+        JOIN classes c ON e.class_id = c.id
+        ORDER BY s.name
+    """).fetchall()
+    
+    subjects = conn.execute("""
+        SELECT id, name, coefficient FROM subjects ORDER BY name
+    """).fetchall()
+    
     conn.close()
+    
     return render_template("add_result.html", 
-                         enrollments=enrollments, 
-                         subjects=subjects,
-                         page_title="Add Result")
+                         page_title="Add Result",
+                         enrollments=enrollments,
+                         subjects=subjects)
 
 # ---- edit result -----
 @app.route("/results/edit/<int:id>")
@@ -695,36 +756,52 @@ def fees():
 @login_required
 def add_fee():
     conn = get_db_connection()
-    students = conn.execute("SELECT id, name FROM students").fetchall()
-    classes = conn.execute("SELECT id, name FROM classes").fetchall()
-
+    
     if request.method == "POST":
-        student_id = request.form["student_id"]
-        class_id = request.form["class_id"]
-        total_fee = float(request.form["total_fee"])
-        amount_paid = float(request.form["amount_paid"])
-        payment_mode = request.form["payment_mode"]
+        student_id = request.form.get("student_id")
+        class_id = request.form.get("class_id")
+        total_fee = float(request.form.get("total_fee"))
+        payment_method = request.form.get("payment_method")
+        amount_paid = float(request.form.get("amount_paid"))
+        remaining_amount = float(request.form.get("remaining_amount"))
+        status = request.form.get("status")
         
-        # Calculate status
-        remaining = total_fee - amount_paid
-        status = "Paid" if remaining == 0 else "Partial" if amount_paid > 0 else "Unpaid"
-
         conn.execute("""
-            INSERT INTO fees
-            (student_id, class_id, total_fee, amount_paid, payment_mode, status)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (student_id, class_id, total_fee, amount_paid, payment_mode, status))
+            INSERT INTO school_fees 
+            (student_id, class_id, total_fee, payment_method, amount_paid, remaining_amount, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (student_id, class_id, total_fee, payment_method, amount_paid, remaining_amount, status))
         
         conn.commit()
         conn.close()
-        flash("Fee record added successfully!", "success")
+        flash(f"Fee record added successfully! Status: {status}", "success")
         return redirect(url_for("fees"))
-
+    
+    # Récupérer les données pour les dropdowns
+    students = conn.execute("""
+        SELECT s.id, s.name, s.matricule, e.class_id 
+        FROM students s
+        LEFT JOIN enrollments e ON s.id = e.student_id
+        ORDER BY s.name
+    """).fetchall()
+    
+    classes = conn.execute("""
+        SELECT c.id, c.name, c.level, f.fee_amount as fee
+        FROM classes c
+        LEFT JOIN (
+            SELECT class_id, AVG(total_fee) as fee_amount 
+            FROM school_fees 
+            GROUP BY class_id
+        ) f ON c.id = f.class_id
+        ORDER BY c.name
+    """).fetchall()
+    
     conn.close()
+    
     return render_template("add_fee.html", 
-                         students=students, 
-                         classes=classes,
-                         page_title="Add Fee")
+                         page_title="Add Fee",
+                         students=students,
+                         classes=classes)
 
 # ---- edit fee -----
 @app.route("/fees/edit/<int:id>")

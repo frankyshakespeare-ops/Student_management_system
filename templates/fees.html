@@ -69,8 +69,8 @@
                            class="edit" title="Edit">
                             <i class='bx bx-edit'></i>
                         </a>
-                        <a href="{{ url_for('add_payment', student_id=fee.student_id) }}"
-                           class="payment" title="Add Payment">
+                        <a href="{{ url_for('add_fee') }}?student_id={{ fee.student_id }}"
+                            class="payment" title="Add Fee">
                             <i class='bx bx-money'></i>
                         </a>
                     </td>

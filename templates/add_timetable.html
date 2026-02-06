@@ -1,0 +1,1013 @@
+{% extends "base.html" %}
+
+{% block page_title %}Add Schedule{% endblock %}
+{% block page_heading %}Add Schedule{% endblock %}
+{% block breadcrumb %}Timetable / Add{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+        <h2>Add New Schedule</h2>
+        <p>Create a new timetable entry</p>
+    </div>
+    
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('add_timetable') }}" class="timetable-form">
+            <div class="form-layout">
+                <!-- LEFT COLUMN: Basic Information -->
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-calendar'></i>
+                            Schedule Details
+                        </h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="day">
+                                    <i class='bx bx-calendar-event'></i>
+                                    Day *
+                                </label>
+                                <select id="day" name="day" required class="form-select">
+                                    <option value="">Select a day</option>
+                                    <option value="Monday">Monday</option>
+                                    <option value="Tuesday">Tuesday</option>
+                                    <option value="Wednesday">Wednesday</option>
+                                    <option value="Thursday">Thursday</option>
+                                    <option value="Friday">Friday</option>
+                                    <option value="Saturday">Saturday</option>
+                                    <option value="Sunday">Sunday</option>
+                                </select>
+                                <div class="form-hint">Select the day of the week</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="class_id">
+                                    <i class='bx bx-group'></i>
+                                    Class *
+                                </label>
+                                <select id="class_id" name="class_id" required class="form-select">
+                                    <option value="">Select a class</option>
+                                    {% for class in classes %}
+                                    <option value="{{ class.id }}">{{ class.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-hint">Choose the class for this schedule</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="start_time">
+                                    <i class='bx bx-time'></i>
+                                    Start Time *
+                                </label>
+                                <input type="time" 
+                                       id="start_time" 
+                                       name="start_time" 
+                                       required
+                                       class="form-input"
+                                       step="300"> <!-- 5 minute steps -->
+                                <div class="form-hint">When the class begins (HH:MM)</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="end_time">
+                                    <i class='bx bx-time-five'></i>
+                                    End Time *
+                                </label>
+                                <input type="time" 
+                                       id="end_time" 
+                                       name="end_time" 
+                                       required
+                                       class="form-input"
+                                       step="300">
+                                <div class="form-hint">When the class ends (HH:MM)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- RIGHT COLUMN: Subject & Resources -->
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-book'></i>
+                            Subject & Teacher
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="subject_id">
+                                <i class='bx bx-book-open'></i>
+                                Subject *
+                            </label>
+                            <select id="subject_id" name="subject_id" required class="form-select">
+                                <option value="">Select a subject</option>
+                                {% for subject in subjects %}
+                                <option value="{{ subject.id }}">{{ subject.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-hint">Choose the subject to be taught</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="teacher_id">
+                                <i class='bx bx-user-voice'></i>
+                                Teacher *
+                            </label>
+                            <select id="teacher_id" name="teacher_id" required class="form-select">
+                                <option value="">Select a teacher</option>
+                                {% for teacher in teachers %}
+                                <option value="{{ teacher.id }}">
+                                    {{ teacher.first_name }} {{ teacher.last_name }}
+                                    {% if teacher.profession %} ({{ teacher.profession }}){% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-hint">Assign a teacher for this class</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Room & Duration -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-building'></i>
+                            Location
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="room_id">
+                                <i class='bx bx-door-open'></i>
+                                Room *
+                            </label>
+                            <select id="room_id" name="room_id" required class="form-select">
+                                <option value="">Select a room</option>
+                                {% for room in rooms %}
+                                <option value="{{ room.id }}">
+                                    {{ room.name }} 
+                                    {% if room.capacity %}(Capacity: {{ room.capacity }}){% endif %}
+                                    {% if room.location %}- {{ room.location }}{% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-hint">Select the classroom for this session</div>
+                        </div>
+                        
+                        <!-- Duration Calculator -->
+                        <div class="duration-calculator">
+                            <div class="duration-label">
+                                <i class='bx bx-timer'></i>
+                                <span>Duration:</span>
+                            </div>
+                            <div class="duration-value" id="durationDisplay">
+                                <span class="duration-hours">0h</span>
+                                <span class="duration-minutes">00m</span>
+                            </div>
+                        </div>
+                        <div class="form-hint">Calculated automatically from start and end times</div>
+                    </div>
+                    
+                    <!-- Conflict Checker -->
+                    <div class="form-section" id="conflictChecker" style="display: none;">
+                        <h3 class="section-title">
+                            <i class='bx bx-error-circle'></i>
+                            Schedule Check
+                        </h3>
+                        
+                        <div class="conflict-alert" id="conflictAlert">
+                            <div class="alert-icon">
+                                <i class='bx bx-check-circle'></i>
+                            </div>
+                            <div class="alert-content">
+                                <h4>No conflicts detected</h4>
+                                <p>This time slot appears to be available</p>
+                            </div>
+                        </div>
+                        <div class="form-hint">Checking for room, teacher, and class conflicts</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SCHEDULE PREVIEW -->
+            <div class="form-section preview-section">
+                <h3 class="section-title">
+                    <i class='bx bx-show'></i>
+                    Schedule Preview
+                </h3>
+                
+                <div class="schedule-preview" id="schedulePreview">
+                    <div class="preview-card">
+                        <div class="preview-header">
+                            <div class="preview-day" id="previewDay">Monday</div>
+                            <div class="preview-time" id="previewTime">08:00 - 09:00</div>
+                        </div>
+                        <div class="preview-body">
+                            <div class="preview-item">
+                                <i class='bx bx-group'></i>
+                                <div>
+                                    <div class="preview-label">Class</div>
+                                    <div class="preview-value" id="previewClass">Not selected</div>
+                                </div>
+                            </div>
+                            <div class="preview-item">
+                                <i class='bx bx-book'></i>
+                                <div>
+                                    <div class="preview-label">Subject</div>
+                                    <div class="preview-value" id="previewSubject">Not selected</div>
+                                </div>
+                            </div>
+                            <div class="preview-item">
+                                <i class='bx bx-user'></i>
+                                <div>
+                                    <div class="preview-label">Teacher</div>
+                                    <div class="preview-value" id="previewTeacher">Not selected</div>
+                                </div>
+                            </div>
+                            <div class="preview-item">
+                                <i class='bx bx-building'></i>
+                                <div>
+                                    <div class="preview-label">Room</div>
+                                    <div class="preview-value" id="previewRoom">Not selected</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="preview-footer">
+                            <div class="preview-duration" id="previewDuration">Duration: 0h 00m</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FORM ACTIONS -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class='bx bx-calendar-plus'></i>
+                    Add to Timetable
+                </button>
+                <a href="{{ url_for('timetable') }}" class="btn btn-secondary">
+                    <i class='bx bx-x'></i>
+                    Cancel
+                </a>
+                <button type="button" class="btn btn-outline" onclick="clearForm()">
+                    <i class='bx bx-reset'></i>
+                    Clear Form
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+/* ===== FORM STYLES ===== */
+.form-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 1200px) {
+    .form-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-section {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+}
+
+.preview-section {
+    margin-top: 2rem;
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border: 1px solid var(--primary-light);
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--gray-300);
+}
+
+.section-title i {
+    color: var(--primary);
+    font-size: 1.25rem;
+}
+
+.preview-section .section-title i {
+    color: var(--primary-dark);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+}
+
+.form-group label i {
+    color: var(--gray-500);
+    font-size: 1rem;
+}
+
+.form-input,
+.form-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    color: var(--gray-800);
+    background: var(--white);
+    transition: all 0.2s;
+    appearance: none;
+}
+
+.form-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 16px;
+}
+
+.form-input:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Time inputs styling */
+input[type="time"] {
+    font-family: inherit;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* Duration Calculator */
+.duration-calculator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: var(--white);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    margin: 1rem 0;
+}
+
+.duration-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+.duration-label i {
+    color: var(--primary);
+    font-size: 1.25rem;
+}
+
+.duration-value {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    font-family: 'Courier New', monospace;
+}
+
+.duration-hours {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.duration-minutes {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-600);
+}
+
+/* Conflict Checker */
+.conflict-alert {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: var(--radius);
+    background: var(--success-light);
+    border: 1px solid var(--success);
+}
+
+.conflict-alert.warning {
+    background: var(--warning-light);
+    border-color: var(--warning);
+}
+
+.conflict-alert.error {
+    background: var(--danger-light);
+    border-color: var(--danger);
+}
+
+.alert-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--success);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.conflict-alert.warning .alert-icon {
+    background: var(--warning);
+}
+
+.conflict-alert.error .alert-icon {
+    background: var(--danger);
+}
+
+.alert-content h4 {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.alert-content p {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.75rem;
+    color: var(--gray-600);
+}
+
+/* Schedule Preview */
+.schedule-preview {
+    display: flex;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+.preview-card {
+    width: 100%;
+    max-width: 500px;
+    background: white;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--gray-300);
+}
+
+.preview-header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    padding: 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.preview-day {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.preview-time {
+    font-size: 1rem;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+}
+
+.preview-body {
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .preview-body {
+        grid-template-columns: 1fr;
+    }
+}
+
+.preview-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+}
+
+.preview-item i {
+    font-size: 1.25rem;
+    color: var(--primary);
+    width: 24px;
+}
+
+.preview-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.125rem;
+}
+
+.preview-value {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-800);
+}
+
+.preview-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--gray-200);
+    background: var(--gray-50);
+    text-align: center;
+}
+
+.preview-duration {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-700);
+}
+
+/* Form Hint */
+.form-hint {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    margin-top: 0.375rem;
+    font-style: italic;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--gray-300);
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.btn-lg {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.btn-outline {
+    border: 1px solid var(--gray-300);
+    background: transparent;
+    color: var(--gray-700);
+}
+
+.btn-outline:hover {
+    background: var(--gray-100);
+    border-color: var(--gray-400);
+}
+
+.btn i {
+    margin-right: 0.5rem;
+}
+
+/* Card Header Styles */
+.card-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 0.25rem;
+}
+
+.card-header p {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin: 0;
+}
+
+/* Validation States */
+.form-input:invalid:not(:focus):not(:placeholder-shown),
+.form-select:invalid:not(:focus) {
+    border-color: var(--danger);
+}
+
+.form-input:valid:not(:focus):not(:placeholder-shown),
+.form-select:valid:not(:focus) {
+    border-color: var(--success);
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.form-section {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.preview-card {
+    animation: fadeIn 0.5s ease-out 0.2s both;
+}
+
+/* Day-specific colors */
+.day-monday { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+.day-tuesday { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+.day-wednesday { background: linear-gradient(135deg, #10b981, #059669); }
+.day-thursday { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.day-friday { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.day-saturday { background: linear-gradient(135deg, #ec4899, #db2777); }
+.day-sunday { background: linear-gradient(135deg, #6b7280, #4b5563); }
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+    }
+    
+    .preview-card {
+        max-width: 100%;
+    }
+}
+
+/* Loading State */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: inherit;
+}
+
+.loading::before {
+    content: '';
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--gray-300);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+}
+
+@keyframes spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('.timetable-form');
+    const daySelect = document.getElementById('day');
+    const classSelect = document.getElementById('class_id');
+    const subjectSelect = document.getElementById('subject_id');
+    const teacherSelect = document.getElementById('teacher_id');
+    const roomSelect = document.getElementById('room_id');
+    const startTimeInput = document.getElementById('start_time');
+    const endTimeInput = document.getElementById('end_time');
+    const durationDisplay = document.getElementById('durationDisplay');
+    const conflictChecker = document.getElementById('conflictChecker');
+    const conflictAlert = document.getElementById('conflictAlert');
+    
+    // Preview elements
+    const previewDay = document.getElementById('previewDay');
+    const previewTime = document.getElementById('previewTime');
+    const previewClass = document.getElementById('previewClass');
+    const previewSubject = document.getElementById('previewSubject');
+    const previewTeacher = document.getElementById('previewTeacher');
+    const previewRoom = document.getElementById('previewRoom');
+    const previewDuration = document.getElementById('previewDuration');
+    
+    // Set default times
+    const now = new Date();
+    now.setHours(8, 0, 0, 0); // 8:00 AM
+    startTimeInput.value = now.toTimeString().slice(0, 5);
+    
+    now.setHours(9, 0, 0, 0); // 9:00 AM
+    endTimeInput.value = now.toTimeString().slice(0, 5);
+    
+    // Calculate duration between two times
+    function calculateDuration(start, end) {
+        const startDate = new Date(`2000-01-01T${start}`);
+        const endDate = new Date(`2000-01-01T${end}`);
+        
+        if (endDate < startDate) {
+            endDate.setDate(endDate.getDate() + 1); // Next day if end is before start
+        }
+        
+        const diffMs = endDate - startDate;
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        
+        return { hours: diffHours, minutes: diffMinutes };
+    }
+    
+    // Update duration display
+    function updateDuration() {
+        const start = startTimeInput.value;
+        const end = endTimeInput.value;
+        
+        if (start && end) {
+            const duration = calculateDuration(start, end);
+            
+            // Update duration calculator
+            durationDisplay.querySelector('.duration-hours').textContent = `${duration.hours}h`;
+            durationDisplay.querySelector('.duration-minutes').textContent = `${duration.minutes.toString().padStart(2, '0')}m`;
+            
+            // Update preview
+            previewDuration.textContent = `Duration: ${duration.hours}h ${duration.minutes.toString().padStart(2, '0')}m`;
+            
+            // Validate duration (minimum 15 minutes, maximum 4 hours)
+            const totalMinutes = duration.hours * 60 + duration.minutes;
+            
+            if (totalMinutes < 15) {
+                showConflict('warning', 'Short duration', 'Minimum class duration is 15 minutes');
+            } else if (totalMinutes > 240) {
+                showConflict('warning', 'Long duration', 'Maximum class duration is 4 hours');
+            } else {
+                hideConflict();
+            }
+        }
+    }
+    
+    // Show conflict message
+    function showConflict(type, title, message) {
+        conflictChecker.style.display = 'block';
+        conflictAlert.className = `conflict-alert ${type}`;
+        conflictAlert.querySelector('h4').textContent = title;
+        conflictAlert.querySelector('p').textContent = message;
+        
+        const iconClass = type === 'error' ? 'bx-error-circle' : 
+                         type === 'warning' ? 'bx-error' : 'bx-check-circle';
+        conflictAlert.querySelector('i').className = `bx ${iconClass}`;
+    }
+    
+    function hideConflict() {
+        conflictChecker.style.display = 'none';
+    }
+    
+    // Update preview based on form inputs
+    function updatePreview() {
+        // Day
+        if (daySelect.value) {
+            previewDay.textContent = daySelect.value;
+            previewDay.className = `preview-day day-${daySelect.value.toLowerCase()}`;
+        } else {
+            previewDay.textContent = 'Day';
+            previewDay.className = 'preview-day';
+        }
+        
+        // Time
+        if (startTimeInput.value && endTimeInput.value) {
+            previewTime.textContent = `${startTimeInput.value} - ${endTimeInput.value}`;
+        } else {
+            previewTime.textContent = 'Time';
+        }
+        
+        // Class
+        if (classSelect.value) {
+            const selectedOption = classSelect.options[classSelect.selectedIndex];
+            previewClass.textContent = selectedOption.text;
+        } else {
+            previewClass.textContent = 'Not selected';
+        }
+        
+        // Subject
+        if (subjectSelect.value) {
+            const selectedOption = subjectSelect.options[subjectSelect.selectedIndex];
+            previewSubject.textContent = selectedOption.text;
+        } else {
+            previewSubject.textContent = 'Not selected';
+        }
+        
+        // Teacher
+        if (teacherSelect.value) {
+            const selectedOption = teacherSelect.options[teacherSelect.selectedIndex];
+            previewTeacher.textContent = selectedOption.text;
+        } else {
+            previewTeacher.textContent = 'Not selected';
+        }
+        
+        // Room
+        if (roomSelect.value) {
+            const selectedOption = roomSelect.options[roomSelect.selectedIndex];
+            previewRoom.textContent = selectedOption.text.split('(')[0].trim();
+        } else {
+            previewRoom.textContent = 'Not selected';
+        }
+        
+        // Update preview header color based on day
+        const previewCard = document.querySelector('.preview-card');
+        const previewHeader = previewCard.querySelector('.preview-header');
+        
+        if (daySelect.value) {
+            const dayClass = `day-${daySelect.value.toLowerCase()}`;
+            previewHeader.className = 'preview-header ' + dayClass;
+        } else {
+            previewHeader.className = 'preview-header';
+        }
+    }
+    
+    // Check for schedule conflicts
+    function checkConflicts() {
+        // In a real application, this would make an API call to check for conflicts
+        // For now, we'll simulate some basic checks
+        
+        const day = daySelect.value;
+        const startTime = startTimeInput.value;
+        const endTime = endTimeInput.value;
+        const room = roomSelect.value;
+        const teacher = teacherSelect.value;
+        const classId = classSelect.value;
+        
+        if (!day || !startTime || !endTime) return;
+        
+        // Simulate conflict checking
+        setTimeout(() => {
+            // Randomly show conflicts for demonstration
+            const hasConflict = Math.random() > 0.7;
+            
+            if (hasConflict) {
+                const conflictTypes = ['room', 'teacher', 'class'];
+                const conflictType = conflictTypes[Math.floor(Math.random() * conflictTypes.length)];
+                
+                if (conflictType === 'room') {
+                    showConflict('error', 'Room conflict', 'This room is already booked at this time');
+                } else if (conflictType === 'teacher') {
+                    showConflict('error', 'Teacher conflict', 'This teacher has another class scheduled');
+                } else {
+                    showConflict('error', 'Class conflict', 'This class has another subject scheduled');
+                }
+            } else {
+                showConflict('success', 'No conflicts detected', 'This time slot appears to be available');
+            }
+        }, 500);
+    }
+    
+    // Clear form function
+    window.clearForm = function() {
+        if (confirm('Are you sure you want to clear all form fields?')) {
+            form.reset();
+            startTimeInput.value = '08:00';
+            endTimeInput.value = '09:00';
+            updateDuration();
+            updatePreview();
+            hideConflict();
+        }
+    };
+    
+    // Event listeners
+    [daySelect, classSelect, subjectSelect, teacherSelect, roomSelect].forEach(select => {
+        select.addEventListener('change', function() {
+            updatePreview();
+            if (this.id === 'day' || this.id === 'start_time' || this.id === 'end_time') {
+                checkConflicts();
+            }
+        });
+    });
+    
+    [startTimeInput, endTimeInput].forEach(input => {
+        input.addEventListener('change', function() {
+            updateDuration();
+            updatePreview();
+            checkConflicts();
+        });
+    });
+    
+    // Initialize
+    updateDuration();
+    updatePreview();
+    
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        const errorMessages = [];
+        
+        // Check required fields
+        const requiredFields = [
+            { element: daySelect, name: 'Day' },
+            { element: classSelect, name: 'Class' },
+            { element: subjectSelect, name: 'Subject' },
+            { element: teacherSelect, name: 'Teacher' },
+            { element: roomSelect, name: 'Room' },
+            { element: startTimeInput, name: 'Start Time' },
+            { element: endTimeInput, name: 'End Time' }
+        ];
+        
+        requiredFields.forEach(field => {
+            if (!field.element.value) {
+                isValid = false;
+                errorMessages.push(`${field.name} is required`);
+                field.element.style.borderColor = 'var(--danger)';
+            } else {
+                field.element.style.borderColor = '';
+            }
+        });
+        
+        // Validate time order
+        if (startTimeInput.value && endTimeInput.value) {
+            const duration = calculateDuration(startTimeInput.value, endTimeInput.value);
+            if (duration.hours === 0 && duration.minutes < 15) {
+                errorMessages.push('Class duration must be at least 15 minutes');
+                isValid = false;
+            }
+            
+            if (duration.hours > 4) {
+                errorMessages.push('Class duration cannot exceed 4 hours');
+                isValid = false;
+            }
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please correct the following errors:\n\n' + errorMessages.join('\n'));
+            
+            // Focus on first error
+            const firstError = requiredFields.find(field => !field.element.value);
+            if (firstError) firstError.element.focus();
+        } else {
+            // Add loading state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="bx bx-loader-circle bx-spin"></i> Adding...';
+                submitBtn.disabled = true;
+                form.classList.add('loading');
+            }
+        }
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,1012 @@
+{% extends "base.html" %}
+
+{% block page_title %}Add Result{% endblock %}
+{% block page_heading %}Add Result{% endblock %}
+{% block breadcrumb %}Results / Add{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+        <h2>Add New Result</h2>
+        <p>Record a student's score for a subject</p>
+    </div>
+    
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('add_result') }}" class="result-form">
+            <div class="form-layout">
+                <!-- LEFT COLUMN: Student & Subject Selection -->
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-user-check'></i>
+                            Student Selection
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="enrollment_id">
+                                <i class='bx bx-user'></i>
+                                Select Student *
+                            </label>
+                            <select id="enrollment_id" name="enrollment_id" required class="form-select student-select">
+                                <option value="">Choose a student...</option>
+                                {% for enrollment in enrollments %}
+                                <option value="{{ enrollment.id }}" 
+                                        data-student="{{ enrollment.student_name }}"
+                                        data-class="{{ enrollment.class_name }}"
+                                        data-year="{{ enrollment.academic_year }}">
+                                    {{ enrollment.student_name }} - {{ enrollment.class_name }} ({{ enrollment.academic_year }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-hint">Select a student from the enrollment list</div>
+                        </div>
+                        
+                        <!-- Student Preview -->
+                        <div class="student-preview" id="studentPreview" style="display: none;">
+                            <div class="preview-header">
+                                <div class="preview-avatar">
+                                    <i class='bx bx-user'></i>
+                                </div>
+                                <div class="preview-info">
+                                    <h4 id="previewStudentName">Student Name</h4>
+                                    <div class="preview-details">
+                                        <span id="previewClassName">Class: Loading...</span>
+                                        <span id="previewAcademicYear">Year: Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-book'></i>
+                            Subject Selection
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="subject_id">
+                                <i class='bx bx-book-open'></i>
+                                Select Subject *
+                            </label>
+                            <select id="subject_id" name="subject_id" required class="form-select">
+                                <option value="">Choose a subject...</option>
+                                {% for subject in subjects %}
+                                <option value="{{ subject.id }}" data-coefficient="{{ subject.coefficient }}">
+                                    {{ subject.name }} (Coefficient: {{ subject.coefficient }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-hint">Select the subject for this result</div>
+                        </div>
+                        
+                        <!-- Subject Details -->
+                        <div class="subject-details" id="subjectDetails" style="display: none;">
+                            <div class="detail-row">
+                                <span class="detail-label">Coefficient:</span>
+                                <span class="detail-value" id="detailCoefficient">-</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Status:</span>
+                                <span class="detail-value" id="detailStatus">Not assigned</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- RIGHT COLUMN: Score & Grading -->
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-line-chart'></i>
+                            Score & Grading
+                        </h3>
+                        
+                        <div class="score-input-container">
+                            <div class="form-group">
+                                <label for="score">
+                                    <i class='bx bx-pen'></i>
+                                    Score (0-20) *
+                                </label>
+                                <div class="score-input-wrapper">
+                                    <input type="number" 
+                                           id="score" 
+                                           name="score" 
+                                           required
+                                           min="0" 
+                                           max="20" 
+                                           step="0.5"
+                                           placeholder="0.0"
+                                           class="score-input">
+                                    <span class="score-max">/20</span>
+                                </div>
+                                <div class="score-slider-container">
+                                    <input type="range" 
+                                           id="scoreSlider" 
+                                           min="0" 
+                                           max="20" 
+                                           step="0.5" 
+                                           value="10"
+                                           class="score-slider">
+                                    <div class="slider-labels">
+                                        <span>0</span>
+                                        <span>10</span>
+                                        <span>20</span>
+                                    </div>
+                                </div>
+                                <div class="form-hint">Enter score between 0 and 20 (can use .5 increments)</div>
+                            </div>
+                            
+                            <!-- Score Visualization -->
+                            <div class="score-visualization">
+                                <div class="grade-indicator">
+                                    <div class="grade-scale">
+                                        <div class="grade-fail" style="width: 50%"></div>
+                                        <div class="grade-pass" style="width: 30%"></div>
+                                        <div class="grade-good" style="width: 20%"></div>
+                                    </div>
+                                    <div class="grade-marker" id="gradeMarker" style="left: 50%;">
+                                        <div class="marker-line"></div>
+                                        <div class="marker-value">10.0</div>
+                                    </div>
+                                </div>
+                                <div class="grade-labels">
+                                    <span class="grade-label fail">Fail (0-9)</span>
+                                    <span class="grade-label pass">Pass (10-14)</span>
+                                    <span class="grade-label good">Good (15-20)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-calendar'></i>
+                            Semester & Details
+                        </h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="semester">
+                                    <i class='bx bx-layer'></i>
+                                    Semester *
+                                </label>
+                                <div class="semester-selector">
+                                    <label class="semester-option">
+                                        <input type="radio" name="semester" value="1" checked>
+                                        <div class="semester-card">
+                                            <div class="semester-icon">1</div>
+                                            <span class="semester-label">Semester 1</span>
+                                        </div>
+                                    </label>
+                                    <label class="semester-option">
+                                        <input type="radio" name="semester" value="2">
+                                        <div class="semester-card">
+                                            <div class="semester-icon">2</div>
+                                            <span class="semester-label">Semester 2</span>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="form-hint">Select the academic semester</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Result Preview -->
+                        <div class="result-preview">
+                            <div class="preview-header">
+                                <h4>Result Summary</h4>
+                            </div>
+                            <div class="preview-content">
+                                <div class="preview-item">
+                                    <i class='bx bx-user'></i>
+                                    <span id="previewResultStudent">No student selected</span>
+                                </div>
+                                <div class="preview-item">
+                                    <i class='bx bx-book'></i>
+                                    <span id="previewResultSubject">No subject selected</span>
+                                </div>
+                                <div class="preview-item">
+                                    <i class='bx bx-line-chart'></i>
+                                    <span id="previewResultScore">Score: -/20</span>
+                                </div>
+                                <div class="preview-item">
+                                    <i class='bx bx-calendar'></i>
+                                    <span id="previewResultSemester">Semester: 1</span>
+                                </div>
+                            </div>
+                            <div class="preview-grade" id="previewGrade">
+                                <span class="grade-text">Grade: -</span>
+                                <span class="grade-status">Status: Not calculated</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FORM ACTIONS -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class='bx bx-save'></i>
+                    Save Result
+                </button>
+                <a href="{{ url_for('results') }}" class="btn btn-secondary">
+                    <i class='bx bx-x'></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+/* ===== FORM STYLES ===== */
+.form-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 992px) {
+    .form-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-section {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--gray-300);
+}
+
+.section-title i {
+    color: var(--primary);
+    font-size: 1.25rem;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+}
+
+.form-group label i {
+    color: var(--gray-500);
+    font-size: 1rem;
+}
+
+.form-input,
+.form-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    color: var(--gray-800);
+    background: var(--white);
+    transition: all 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 16px;
+}
+
+.form-input:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-row {
+    display: grid;
+    gap: 1rem;
+}
+
+/* Student Preview */
+.student-preview {
+    background: var(--white);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-top: 1rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.preview-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.preview-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--gray-600);
+}
+
+.preview-info h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.preview-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+}
+
+.preview-details span {
+    font-size: 0.75rem;
+    color: var(--gray-600);
+}
+
+/* Subject Details */
+.subject-details {
+    background: var(--white);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-top: 1rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+}
+
+.detail-value {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-800);
+}
+
+/* Score Input */
+.score-input-container {
+    margin-top: 1rem;
+}
+
+.score-input-wrapper {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.score-input {
+    padding-right: 3rem !important;
+    font-size: 1.25rem !important;
+    font-weight: 600 !important;
+    text-align: center !important;
+}
+
+.score-max {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: var(--gray-500);
+    font-weight: 500;
+}
+
+.score-slider-container {
+    margin: 1.5rem 0;
+}
+
+.score-slider {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(to right, #ef4444, #f59e0b, #10b981);
+    border-radius: 3px;
+    outline: none;
+}
+
+.score-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    border: 3px solid var(--white);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--gray-500);
+}
+
+/* Score Visualization */
+.score-visualization {
+    margin-top: 2rem;
+}
+
+.grade-indicator {
+    position: relative;
+    height: 60px;
+    margin: 1rem 0;
+}
+
+.grade-scale {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    height: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+}
+
+.grade-fail {
+    background: linear-gradient(to right, #ef4444, #f87171);
+    height: 100%;
+}
+
+.grade-pass {
+    background: linear-gradient(to right, #f59e0b, #fbbf24);
+    height: 100%;
+}
+
+.grade-good {
+    background: linear-gradient(to right, #10b981, #34d399);
+    height: 100%;
+}
+
+.grade-marker {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    transition: left 0.3s ease;
+}
+
+.marker-line {
+    width: 2px;
+    height: 40px;
+    background: var(--gray-800);
+    margin: 0 auto;
+}
+
+.marker-value {
+    margin-top: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background: var(--gray-800);
+    color: var(--white);
+    border-radius: var(--radius);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    min-width: 40px;
+}
+
+.grade-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+}
+
+.grade-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+}
+
+.grade-label.fail {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.grade-label.pass {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.grade-label.good {
+    background: #dcfce7;
+    color: #166534;
+}
+
+/* Semester Selector */
+.semester-selector {
+    display: flex;
+    gap: 1rem;
+    margin: 0.5rem 0;
+}
+
+.semester-option {
+    flex: 1;
+    cursor: pointer;
+}
+
+.semester-option input[type="radio"] {
+    display: none;
+}
+
+.semester-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    border: 2px solid var(--gray-300);
+    border-radius: var(--radius);
+    background: var(--white);
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.semester-card:hover {
+    border-color: var(--primary-light);
+    background: var(--gray-50);
+}
+
+.semester-option input[type="radio"]:checked + .semester-card {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--white);
+}
+
+.semester-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+}
+
+.semester-option input[type="radio"]:checked + .semester-card .semester-icon {
+    background: var(--white);
+    color: var(--primary);
+}
+
+.semester-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Result Preview */
+.result-preview {
+    background: var(--white);
+    border: 2px solid var(--gray-300);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.result-preview .preview-header {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.result-preview .preview-header h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.preview-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.preview-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--gray-700);
+}
+
+.preview-item i {
+    color: var(--gray-500);
+    font-size: 1rem;
+}
+
+.preview-grade {
+    padding: 1rem;
+    background: var(--gray-100);
+    border-radius: var(--radius);
+    text-align: center;
+}
+
+.grade-text {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 0.25rem;
+}
+
+.grade-status {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+}
+
+/* Grade Colors */
+.grade-f { color: #dc2626 !important; }
+.grade-e { color: #ef4444 !important; }
+.grade-d { color: #f59e0b !important; }
+.grade-c { color: #f59e0b !important; }
+.grade-b { color: #10b981 !important; }
+.grade-a { color: #059669 !important; }
+
+/* Form Hint */
+.form-hint {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    margin-top: 0.375rem;
+    font-style: italic;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--gray-300);
+    margin-top: 2rem;
+}
+
+.btn-lg {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.btn i {
+    margin-right: 0.5rem;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.pulse {
+    animation: pulse 0.3s ease;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .preview-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .semester-selector {
+        flex-direction: column;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // DOM Elements
+    const enrollmentSelect = document.getElementById('enrollment_id');
+    const subjectSelect = document.getElementById('subject_id');
+    const scoreInput = document.getElementById('score');
+    const scoreSlider = document.getElementById('scoreSlider');
+    const semesterRadios = document.querySelectorAll('input[name="semester"]');
+    
+    // Preview Elements
+    const studentPreview = document.getElementById('studentPreview');
+    const subjectDetails = document.getElementById('subjectDetails');
+    const gradeMarker = document.getElementById('gradeMarker');
+    
+    // Result Preview Elements
+    const previewStudent = document.getElementById('previewResultStudent');
+    const previewSubject = document.getElementById('previewResultSubject');
+    const previewScore = document.getElementById('previewResultScore');
+    const previewSemester = document.getElementById('previewResultSemester');
+    const previewGrade = document.getElementById('previewGrade');
+    
+    // Student Selection Handler
+    enrollmentSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (this.value) {
+            // Show student preview
+            studentPreview.style.display = 'block';
+            
+            // Update preview info
+            document.getElementById('previewStudentName').textContent = 
+                selectedOption.getAttribute('data-student');
+            document.getElementById('previewClassName').textContent = 
+                `Class: ${selectedOption.getAttribute('data-class')}`;
+            document.getElementById('previewAcademicYear').textContent = 
+                `Year: ${selectedOption.getAttribute('data-year')}`;
+            
+            // Update result preview
+            previewStudent.textContent = selectedOption.getAttribute('data-student');
+        } else {
+            studentPreview.style.display = 'none';
+            previewStudent.textContent = 'No student selected';
+        }
+        
+        updateResultPreview();
+    });
+    
+    // Subject Selection Handler
+    subjectSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (this.value) {
+            // Show subject details
+            subjectDetails.style.display = 'block';
+            
+            // Update details
+            document.getElementById('detailCoefficient').textContent = 
+                selectedOption.getAttribute('data-coefficient');
+            document.getElementById('detailStatus').textContent = 'Active';
+            
+            // Update result preview
+            previewSubject.textContent = selectedOption.text.split(' (')[0];
+        } else {
+            subjectDetails.style.display = 'none';
+            previewSubject.textContent = 'No subject selected';
+        }
+        
+        updateResultPreview();
+    });
+    
+    // Score Input Handler
+    function updateScore(value) {
+        // Update both input and slider
+        scoreInput.value = value;
+        scoreSlider.value = value;
+        
+        // Update grade marker position
+        const percentage = (value / 20) * 100;
+        gradeMarker.style.left = `${percentage}%`;
+        gradeMarker.querySelector('.marker-value').textContent = value.toFixed(1);
+        
+        // Update result preview
+        previewScore.textContent = `Score: ${value.toFixed(1)}/20`;
+        
+        // Update grade
+        updateGrade(value);
+        updateResultPreview();
+    }
+    
+    // Input change
+    scoreInput.addEventListener('input', function() {
+        let value = parseFloat(this.value);
+        if (isNaN(value)) value = 0;
+        if (value < 0) value = 0;
+        if (value > 20) value = 20;
+        
+        // Round to nearest 0.5
+        value = Math.round(value * 2) / 2;
+        this.value = value.toFixed(1);
+        
+        updateScore(value);
+    });
+    
+    // Slider change
+    scoreSlider.addEventListener('input', function() {
+        updateScore(parseFloat(this.value));
+    });
+    
+    // Semester Selection Handler
+    semesterRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                previewSemester.textContent = `Semester: ${this.value}`;
+                updateResultPreview();
+            }
+        });
+    });
+    
+    // Grade Calculation
+    function updateGrade(score) {
+        const gradeElement = previewGrade.querySelector('.grade-text');
+        const statusElement = previewGrade.querySelector('.grade-status');
+        
+        let grade, status, gradeClass;
+        
+        if (score >= 18) {
+            grade = 'A+';
+            status = 'Excellent';
+            gradeClass = 'grade-a';
+        } else if (score >= 16) {
+            grade = 'A';
+            status = 'Very Good';
+            gradeClass = 'grade-a';
+        } else if (score >= 14) {
+            grade = 'B';
+            status = 'Good';
+            gradeClass = 'grade-b';
+        } else if (score >= 12) {
+            grade = 'C';
+            status = 'Satisfactory';
+            gradeClass = 'grade-c';
+        } else if (score >= 10) {
+            grade = 'D';
+            status = 'Pass';
+            gradeClass = 'grade-d';
+        } else {
+            grade = 'F';
+            status = 'Fail';
+            gradeClass = 'grade-f';
+        }
+        
+        // Update display
+        gradeElement.textContent = `Grade: ${grade}`;
+        statusElement.textContent = `Status: ${status}`;
+        
+        // Update classes
+        gradeElement.className = 'grade-text ' + gradeClass;
+        previewGrade.classList.remove('grade-f', 'grade-e', 'grade-d', 'grade-c', 'grade-b', 'grade-a');
+        previewGrade.classList.add(gradeClass);
+    }
+    
+    // Update Result Preview
+    function updateResultPreview() {
+        // Add pulse animation
+        previewGrade.classList.add('pulse');
+        setTimeout(() => {
+            previewGrade.classList.remove('pulse');
+        }, 300);
+    }
+    
+    // Initialize with default values
+    updateScore(10);
+    
+    // Form Validation
+    const form = document.querySelector('.result-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            let errorMessage = '';
+            
+            // Validate student selection
+            if (!enrollmentSelect.value) {
+                isValid = false;
+                errorMessage += '• Please select a student\n';
+                enrollmentSelect.style.borderColor = 'var(--danger)';
+            } else {
+                enrollmentSelect.style.borderColor = '';
+            }
+            
+            // Validate subject selection
+            if (!subjectSelect.value) {
+                isValid = false;
+                errorMessage += '• Please select a subject\n';
+                subjectSelect.style.borderColor = 'var(--danger)';
+            } else {
+                subjectSelect.style.borderColor = '';
+            }
+            
+            // Validate score
+            const score = parseFloat(scoreInput.value);
+            if (isNaN(score) || score < 0 || score > 20) {
+                isValid = false;
+                errorMessage += '• Score must be between 0 and 20\n';
+                scoreInput.style.borderColor = 'var(--danger)';
+            } else {
+                scoreInput.style.borderColor = '';
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please correct the following:\n\n' + errorMessage);
+                
+                if (!enrollmentSelect.value) {
+                    enrollmentSelect.focus();
+                } else if (!subjectSelect.value) {
+                    subjectSelect.focus();
+                } else if (isNaN(score)) {
+                    scoreInput.focus();
+                }
+            } else {
+                // Add loading state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="bx bx-loader-circle bx-spin"></i> Saving...';
+                    submitBtn.disabled = true;
+                }
+            }
+        });
+    }
+    
+    // Real-time validation feedback
+    scoreInput.addEventListener('input', function() {
+        const score = parseFloat(this.value);
+        if (!isNaN(score) && score >= 0 && score <= 20) {
+            this.style.borderColor = 'var(--success)';
+        } else {
+            this.style.borderColor = 'var(--danger)';
+        }
+    });
+    
+    // Focus management
+    setTimeout(() => {
+        if (enrollmentSelect && !enrollmentSelect.value) {
+            enrollmentSelect.focus();
+        }
+    }, 300);
+});
+</script>
+
+{% endblock %}

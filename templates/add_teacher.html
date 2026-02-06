@@ -1,0 +1,424 @@
+{% extends "base.html" %}
+
+{% block page_title %}Add Teacher{% endblock %}
+{% block page_heading %}Add Teacher{% endblock %}
+{% block breadcrumb %}Teachers / Add{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+        <h2>Add New Teacher</h2>
+        <p>Fill in the teacher's information below</p>
+    </div>
+    
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('add_teacher') }}" class="teacher-form">
+            <div class="form-layout">
+                <!-- LEFT COLUMN: Personal Information -->
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-user'></i>
+                            Personal Information
+                        </h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="first_name">
+                                    <i class='bx bx-user-circle'></i>
+                                    First Name
+                                </label>
+                                <input type="text" 
+                                       id="first_name" 
+                                       name="first_name" 
+                                       required
+                                       placeholder="Enter first name"
+                                       class="form-input">
+                                <div class="form-hint">Teacher's first name</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="last_name">
+                                    <i class='bx bx-user-circle'></i>
+                                    Last Name
+                                </label>
+                                <input type="text" 
+                                       id="last_name" 
+                                       name="last_name" 
+                                       required
+                                       placeholder="Enter last name"
+                                       class="form-input">
+                                <div class="form-hint">Teacher's last name</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">
+                                <i class='bx bx-phone'></i>
+                                Phone Number
+                            </label>
+                            <input type="tel" 
+                                   id="phone" 
+                                   name="phone" 
+                                   placeholder="e.g., +1234567890"
+                                   class="form-input">
+                            <div class="form-hint">Optional contact number</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="country">
+                                <i class='bx bx-map'></i>
+                                Country
+                            </label>
+                            <select id="country" name="country" class="form-select">
+                                <option value="">Select a country</option>
+                                <option value="USA">United States</option>
+                                <option value="UK">United Kingdom</option>
+                                <option value="Canada">Canada</option>
+                                <option value="France">France</option>
+                                <option value="Germany">Germany</option>
+                                <option value="Australia">Australia</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <div class="form-hint">Teacher's nationality</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- RIGHT COLUMN: Professional Information -->
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-briefcase'></i>
+                            Professional Information
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="profession">
+                                <i class='bx bx-briefcase-alt'></i>
+                                Profession
+                            </label>
+                            <input type="text" 
+                                   id="profession" 
+                                   name="profession" 
+                                   placeholder="e.g., Mathematics Teacher"
+                                   class="form-input">
+                            <div class="form-hint">Teacher's specialization</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="diploma">
+                                <i class='bx bx-certification'></i>
+                                Diploma / Degree
+                            </label>
+                            <input type="text" 
+                                   id="diploma" 
+                                   name="diploma" 
+                                   placeholder="e.g., Master's in Education"
+                                   class="form-input">
+                            <div class="form-hint">Highest educational qualification</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Photo Upload Section -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-camera'></i>
+                            Photo (Optional)
+                        </h3>
+                        
+                        <div class="photo-upload-area">
+                            <div class="upload-placeholder">
+                                <i class='bx bx-cloud-upload'></i>
+                                <p>Upload teacher's photo</p>
+                                <span class="upload-hint">JPG or PNG, max 2MB</span>
+                            </div>
+                            <input type="file" 
+                                   id="photo" 
+                                   name="photo" 
+                                   accept="image/*" 
+                                   style="display: none;">
+                        </div>
+                        <div class="form-hint">Optional profile picture</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FORM ACTIONS -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class='bx bx-user-plus'></i>
+                    Add Teacher
+                </button>
+                <a href="{{ url_for('teachers') }}" class="btn btn-secondary">
+                    <i class='bx bx-x'></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+/* ===== FORM STYLES ===== */
+.form-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 992px) {
+    .form-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-section {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--gray-300);
+}
+
+.section-title i {
+    color: var(--primary);
+    font-size: 1.25rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+}
+
+.form-group label i {
+    color: var(--gray-500);
+    font-size: 1rem;
+}
+
+.form-input,
+.form-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    color: var(--gray-800);
+    background: var(--white);
+    transition: all 0.2s;
+}
+
+.form-input:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-input::placeholder {
+    color: var(--gray-400);
+}
+
+.form-hint {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    margin-top: 0.375rem;
+    font-style: italic;
+}
+
+/* Photo Upload */
+.photo-upload-area {
+    border: 2px dashed var(--gray-300);
+    border-radius: var(--radius-md);
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: var(--white);
+}
+
+.photo-upload-area:hover {
+    border-color: var(--primary);
+    background: var(--gray-50);
+}
+
+.upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--gray-600);
+}
+
+.upload-placeholder i {
+    font-size: 3rem;
+    color: var(--gray-400);
+}
+
+.upload-placeholder p {
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.upload-hint {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--gray-300);
+    margin-top: 2rem;
+}
+
+.btn-lg {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.btn i {
+    margin-right: 0.5rem;
+}
+
+/* Card Header Styles */
+.card-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 0.25rem;
+}
+
+.card-header p {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin: 0;
+}
+
+/* Validation States */
+.form-input:invalid:not(:focus):not(:placeholder-shown) {
+    border-color: var(--danger);
+}
+
+.form-input:valid:not(:focus):not(:placeholder-shown) {
+    border-color: var(--success);
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-section {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.form-section:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.form-section:nth-child(3) {
+    animation-delay: 0.2s;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Photo upload click handler
+    const uploadArea = document.querySelector('.photo-upload-area');
+    const fileInput = document.getElementById('photo');
+    
+    if (uploadArea && fileInput) {
+        uploadArea.addEventListener('click', function() {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                const fileName = e.target.files[0].name;
+                uploadArea.innerHTML = `
+                    <div style="text-align: center;">
+                        <i class='bx bx-check-circle' style="font-size: 3rem; color: #10b981;"></i>
+                        <p style="margin: 0.5rem 0; font-weight: 500;">${fileName}</p>
+                        <span class="upload-hint">Click to change</span>
+                    </div>
+                `;
+                
+                // Re-attach click event
+                uploadArea.addEventListener('click', function() {
+                    fileInput.click();
+                });
+            }
+        });
+    }
+    
+    // Form validation
+    const form = document.querySelector('.teacher-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const firstName = document.getElementById('first_name');
+            const lastName = document.getElementById('last_name');
+            
+            if (!firstName.value.trim() || !lastName.value.trim()) {
+                e.preventDefault();
+                alert('Please fill in required fields (First Name and Last Name)');
+                if (!firstName.value.trim()) firstName.focus();
+                else lastName.focus();
+            }
+        });
+    }
+    
+    // Auto-focus first field
+    setTimeout(() => {
+        const firstField = document.getElementById('first_name');
+        if (firstField) firstField.focus();
+    }, 300);
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,962 @@
+{% extends "base.html" %}
+
+{% block page_title %}Add Enrollment{% endblock %}
+{% block page_heading %}Add Enrollment{% endblock %}
+{% block breadcrumb %}Enrollments / Add{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+        <h2>Enroll Student</h2>
+        <p>Register a student in a class for an academic year</p>
+    </div>
+    
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('add_enrollment') }}" class="enrollment-form">
+            <div class="form-layout">
+                <!-- LEFT COLUMN: Student Selection -->
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-user'></i>
+                            Select Student
+                        </h3>
+                        
+                        <div class="student-search">
+                            <div class="search-box">
+                                <i class='bx bx-search'></i>
+                                <input type="text" 
+                                       id="studentSearch" 
+                                       placeholder="Search student by name or matricule..."
+                                       class="search-input">
+                            </div>
+                            <div class="search-hint">Type to filter students</div>
+                        </div>
+                        
+                        <div class="student-list" id="studentList">
+                            {% for student in students %}
+                            <label class="student-item" data-id="{{ student.id }}">
+                                <input type="radio" 
+                                       name="student_id" 
+                                       value="{{ student.id }}" 
+                                       required
+                                       class="student-radio">
+                                <div class="student-info">
+                                    <div class="student-avatar">
+                                        <img src="https://i.pravatar.cc/40?u={{ student.id }}" 
+                                             alt="{{ student.name }}">
+                                    </div>
+                                    <div class="student-details">
+                                        <h4>{{ student.name }}</h4>
+                                        <p>{{ student.matricule }}</p>
+                                        <div class="student-tags">
+                                            {% if student.date_of_birth %}
+                                            <span class="student-tag">
+                                                <i class='bx bx-cake'></i>
+                                                {{ calculate_age(student.date_of_birth) }} yrs
+                                            </span>
+                                            {% endif %}
+                                            {% if student.gender %}
+                                            <span class="student-tag">
+                                                <i class='bx bx-male-female'></i>
+                                                {{ student.gender }}
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="student-check">
+                                    <i class='bx bx-check'></i>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="form-hint">Select one student to enroll</div>
+                    </div>
+                </div>
+                
+                <!-- RIGHT COLUMN: Class & Academic Year -->
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-building'></i>
+                            Class & Academic Year
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="class_id">
+                                <i class='bx bx-group'></i>
+                                Select Class *
+                            </label>
+                            <div class="class-grid" id="classGrid">
+                                {% for class in classes %}
+                                <label class="class-option" data-id="{{ class.id }}">
+                                    <input type="radio" 
+                                           name="class_id" 
+                                           value="{{ class.id }}" 
+                                           required
+                                           class="class-radio">
+                                    <div class="class-card">
+                                        <div class="class-icon">
+                                            <i class='bx bx-building-house'></i>
+                                        </div>
+                                        <div class="class-info">
+                                            <h4>{{ class.name }}</h4>
+                                            <p>{{ class.level }}</p>
+                                            <div class="class-stats">
+                                                <span class="class-stat">
+                                                    <i class='bx bx-user'></i>
+                                                    <span class="class-count">0</span> students
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </label>
+                                {% endfor %}
+                            </div>
+                            <div class="form-hint">Choose the class for enrollment</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="academic_year">
+                                <i class='bx bx-calendar'></i>
+                                Academic Year *
+                            </label>
+                            <div class="year-selector">
+                                <button type="button" class="year-btn prev-year">
+                                    <i class='bx bx-chevron-left'></i>
+                                </button>
+                                <div class="year-display">
+                                    <select id="academic_year" name="academic_year" required class="year-select">
+                                        {% for year in academic_years %}
+                                        <option value="{{ year }}" {% if year == current_year %}selected{% endif %}>
+                                            {{ year }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <button type="button" class="year-btn next-year">
+                                    <i class='bx bx-chevron-right'></i>
+                                </button>
+                            </div>
+                            <div class="form-hint">Select the academic year for enrollment</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Enrollment Preview -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-show'></i>
+                            Enrollment Summary
+                        </h3>
+                        
+                        <div class="enrollment-preview" id="enrollmentPreview">
+                            <div class="preview-header">
+                                <div class="preview-icon">
+                                    <i class='bx bx-user-plus'></i>
+                                </div>
+                                <div class="preview-title">
+                                    <h4>New Enrollment</h4>
+                                    <span class="preview-status">Pending</span>
+                                </div>
+                            </div>
+                            <div class="preview-content">
+                                <div class="preview-row">
+                                    <div class="preview-label">Student:</div>
+                                    <div class="preview-value" id="previewStudent">Not selected</div>
+                                </div>
+                                <div class="preview-row">
+                                    <div class="preview-label">Class:</div>
+                                    <div class="preview-value" id="previewClass">Not selected</div>
+                                </div>
+                                <div class="preview-row">
+                                    <div class="preview-label">Academic Year:</div>
+                                    <div class="preview-value" id="previewYear">{{ current_year }}</div>
+                                </div>
+                                <div class="preview-row">
+                                    <div class="preview-label">Enrollment Date:</div>
+                                    <div class="preview-value">{{ today }}</div>
+                                </div>
+                            </div>
+                            <div class="preview-footer">
+                                <span class="preview-id">ENR-0000</span>
+                            </div>
+                        </div>
+                        <div class="form-hint">Review the enrollment details before submission</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FORM ACTIONS -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class='bx bx-user-plus'></i>
+                    Complete Enrollment
+                </button>
+                <a href="{{ url_for('enrollments') }}" class="btn btn-secondary">
+                    <i class='bx bx-x'></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+/* ===== FORM STYLES ===== */
+.form-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 992px) {
+    .form-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-section {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--gray-300);
+}
+
+.section-title i {
+    color: var(--primary);
+    font-size: 1.25rem;
+}
+
+/* Student Search */
+.student-search {
+    margin-bottom: 1rem;
+}
+
+.search-box {
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.search-box i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    color: var(--gray-800);
+    background: var(--white);
+    transition: all 0.2s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.search-hint {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    font-style: italic;
+}
+
+/* Student List */
+.student-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    background: var(--white);
+    margin: 1rem 0;
+}
+
+.student-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--gray-100);
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.student-item:hover {
+    background: var(--gray-50);
+}
+
+.student-item:last-child {
+    border-bottom: none;
+}
+
+.student-radio {
+    display: none;
+}
+
+.student-radio:checked + .student-info {
+    opacity: 1;
+}
+
+.student-radio:checked ~ .student-check {
+    display: flex;
+}
+
+.student-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+}
+
+.student-avatar img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid var(--gray-300);
+    object-fit: cover;
+}
+
+.student-details h4 {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.student-details p {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.75rem;
+    color: var(--gray-600);
+}
+
+.student-tags {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.student-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    background: var(--gray-100);
+    border-radius: 1rem;
+    font-size: 0.625rem;
+    color: var(--gray-600);
+    font-weight: 500;
+}
+
+.student-check {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--white);
+    font-size: 1rem;
+}
+
+/* Class Grid */
+.class-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+@media (max-width: 768px) {
+    .class-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.class-option {
+    cursor: pointer;
+}
+
+.class-radio {
+    display: none;
+}
+
+.class-card {
+    padding: 1rem;
+    border: 2px solid var(--gray-300);
+    border-radius: var(--radius);
+    background: var(--white);
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.class-option:hover .class-card {
+    border-color: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.class-radio:checked + .class-card {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--white);
+}
+
+.class-radio:checked + .class-card h4,
+.class-radio:checked + .class-card p,
+.class-radio:checked + .class-card .class-stat {
+    color: var(--white);
+}
+
+.class-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem auto;
+    color: var(--gray-600);
+    font-size: 1.5rem;
+}
+
+.class-radio:checked + .class-card .class-icon {
+    background: rgba(255, 255, 255, 0.2);
+    color: var(--white);
+}
+
+.class-info h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.class-info p {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.75rem;
+    color: var(--gray-600);
+}
+
+.class-stats {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+}
+
+.class-stat {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.class-count {
+    font-weight: 600;
+}
+
+/* Year Selector */
+.year-selector {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.year-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    background: var(--white);
+    color: var(--gray-600);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.year-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.year-display {
+    flex: 1;
+}
+
+.year-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    text-align: center;
+    background: var(--white);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 16px;
+}
+
+.year-select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+/* Enrollment Preview */
+.enrollment-preview {
+    background: var(--white);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.preview-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.preview-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-light), var(--primary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 1.5rem;
+}
+
+.preview-title {
+    flex: 1;
+}
+
+.preview-title h4 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.preview-status {
+    display: inline-block;
+    margin-top: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    background: var(--warning-light);
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--warning-dark);
+}
+
+.preview-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.preview-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.preview-row:last-child {
+    border-bottom: none;
+}
+
+.preview-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-600);
+}
+
+.preview-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    text-align: right;
+}
+
+.preview-footer {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--gray-200);
+    font-size: 0.75rem;
+    color: var(--gray-500);
+}
+
+/* Form Hint */
+.form-hint {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    margin-top: 0.375rem;
+    font-style: italic;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--gray-300);
+    margin-top: 2rem;
+}
+
+.btn-lg {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.btn i {
+    margin-right: 0.5rem;
+}
+
+/* Card Header Styles */
+.card-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 0.25rem;
+}
+
+.card-header p {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin: 0;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-section {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.enrollment-preview {
+    animation: fadeIn 0.5s ease-out 0.2s both;
+}
+
+/* Status Colors */
+.preview-status.pending {
+    background: var(--warning-light);
+    color: var(--warning-dark);
+}
+
+.preview-status.active {
+    background: var(--success-light);
+    color: var(--success-dark);
+}
+
+.preview-status.completed {
+    background: var(--info-light);
+    color: var(--info-dark);
+}
+
+/* Scrollbar Styling */
+.student-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.student-list::-webkit-scrollbar-track {
+    background: var(--gray-100);
+    border-radius: 3px;
+}
+
+.student-list::-webkit-scrollbar-thumb {
+    background: var(--gray-400);
+    border-radius: 3px;
+}
+
+.student-list::-webkit-scrollbar-thumb:hover {
+    background: var(--gray-500);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Elements
+    const studentSearch = document.getElementById('studentSearch');
+    const studentItems = document.querySelectorAll('.student-item');
+    const classOptions = document.querySelectorAll('.class-option');
+    const yearSelect = document.getElementById('academic_year');
+    const prevYearBtn = document.querySelector('.prev-year');
+    const nextYearBtn = document.querySelector('.next-year');
+    
+    // Preview elements
+    const previewStudent = document.getElementById('previewStudent');
+    const previewClass = document.getElementById('previewClass');
+    const previewYear = document.getElementById('previewYear');
+    
+    // Current date for enrollment
+    const today = new Date().toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+    });
+    
+    // Initialize today in preview
+    document.querySelectorAll('.today').forEach(el => {
+        el.textContent = today;
+    });
+    
+    // Student search functionality
+    studentSearch.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        
+        studentItems.forEach(item => {
+            const studentName = item.querySelector('h4').textContent.toLowerCase();
+            const studentMatricule = item.querySelector('p').textContent.toLowerCase();
+            
+            if (studentName.includes(searchTerm) || studentMatricule.includes(searchTerm) || searchTerm === '') {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+    
+    // Student selection
+    studentItems.forEach(item => {
+        item.addEventListener('click', function() {
+            // Remove selected class from all students
+            studentItems.forEach(s => {
+                s.classList.remove('selected');
+                s.querySelector('.student-check').style.display = 'none';
+            });
+            
+            // Add selected class to clicked student
+            this.classList.add('selected');
+            this.querySelector('.student-check').style.display = 'flex';
+            
+            // Check the radio button
+            const radio = this.querySelector('.student-radio');
+            radio.checked = true;
+            
+            // Update preview
+            updatePreview();
+        });
+    });
+    
+    // Class selection
+    classOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            // Remove selected class from all options
+            classOptions.forEach(c => {
+                c.querySelector('.class-card').classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            this.querySelector('.class-card').classList.add('selected');
+            
+            // Check the radio button
+            const radio = this.querySelector('.class-radio');
+            radio.checked = true;
+            
+            // Update preview
+            updatePreview();
+        });
+    });
+    
+    // Year navigation
+    if (prevYearBtn && nextYearBtn && yearSelect) {
+        prevYearBtn.addEventListener('click', function() {
+            const currentYear = parseInt(yearSelect.value.split('-')[0]);
+            const prevYear = `${currentYear - 1}-${currentYear}`;
+            
+            // Check if this year exists in options
+            const optionExists = Array.from(yearSelect.options).some(opt => opt.value === prevYear);
+            if (optionExists) {
+                yearSelect.value = prevYear;
+                updatePreview();
+            }
+        });
+        
+        nextYearBtn.addEventListener('click', function() {
+            const currentYear = parseInt(yearSelect.value.split('-')[0]);
+            const nextYear = `${currentYear + 1}-${currentYear + 2}`;
+            
+            // Check if this year exists in options
+            const optionExists = Array.from(yearSelect.options).some(opt => opt.value === nextYear);
+            if (optionExists) {
+                yearSelect.value = nextYear;
+                updatePreview();
+            }
+        });
+        
+        yearSelect.addEventListener('change', updatePreview);
+    }
+    
+    // Update preview function
+    function updatePreview() {
+        // Update student preview
+        const selectedStudent = document.querySelector('.student-item.selected');
+        if (selectedStudent) {
+            const studentName = selectedStudent.querySelector('h4').textContent;
+            previewStudent.textContent = studentName;
+            previewStudent.style.color = 'var(--gray-900)';
+        } else {
+            previewStudent.textContent = 'Not selected';
+            previewStudent.style.color = 'var(--gray-500)';
+        }
+        
+        // Update class preview
+        const selectedClass = document.querySelector('.class-card.selected');
+        if (selectedClass) {
+            const className = selectedClass.querySelector('h4').textContent;
+            const classLevel = selectedClass.querySelector('p').textContent;
+            previewClass.textContent = `${className} (${classLevel})`;
+            previewClass.style.color = 'var(--gray-900)';
+        } else {
+            previewClass.textContent = 'Not selected';
+            previewClass.style.color = 'var(--gray-500)';
+        }
+        
+        // Update year preview
+        if (yearSelect) {
+            previewYear.textContent = yearSelect.value;
+        }
+        
+        // Update enrollment status based on selections
+        const previewStatus = document.querySelector('.preview-status');
+        if (selectedStudent && selectedClass) {
+            previewStatus.textContent = 'Ready to enroll';
+            previewStatus.className = 'preview-status active';
+        } else {
+            previewStatus.textContent = 'Pending';
+            previewStatus.className = 'preview-status pending';
+        }
+        
+        // Generate enrollment ID
+        const enrollmentId = generateEnrollmentId();
+        document.querySelector('.preview-id').textContent = `ENR-${enrollmentId}`;
+    }
+    
+    // Generate enrollment ID
+    function generateEnrollmentId() {
+        const date = new Date();
+        const year = date.getFullYear().toString().slice(-2);
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const random = Math.floor(Math.random() * 9000) + 1000;
+        return `${year}${month}${random}`;
+    }
+    
+    // Form validation
+    const form = document.querySelector('.enrollment-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            let errorMessage = '';
+            
+            // Check if student is selected
+            const selectedStudent = document.querySelector('.student-radio:checked');
+            if (!selectedStudent) {
+                isValid = false;
+                errorMessage += '• Please select a student\n';
+                document.querySelector('.student-list').style.borderColor = 'var(--danger)';
+            } else {
+                document.querySelector('.student-list').style.borderColor = '';
+            }
+            
+            // Check if class is selected
+            const selectedClass = document.querySelector('.class-radio:checked');
+            if (!selectedClass) {
+                isValid = false;
+                errorMessage += '• Please select a class\n';
+                document.querySelector('.class-grid').style.border = '2px solid var(--danger)';
+            } else {
+                document.querySelector('.class-grid').style.border = '';
+            }
+            
+            // Check academic year
+            if (!yearSelect.value) {
+                isValid = false;
+                errorMessage += '• Please select an academic year\n';
+                yearSelect.style.borderColor = 'var(--danger)';
+            } else {
+                yearSelect.style.borderColor = '';
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please complete the following:\n\n' + errorMessage);
+                
+                if (!selectedStudent) {
+                    studentSearch.focus();
+                } else if (!selectedClass) {
+                    document.querySelector('.class-grid').scrollIntoView({ behavior: 'smooth' });
+                }
+            } else {
+                // Add loading state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="bx bx-loader-circle bx-spin"></i> Enrolling...';
+                    submitBtn.disabled = true;
+                }
+            }
+        });
+    }
+    
+    // Auto-select first student and class for demo (optional)
+    // setTimeout(() => {
+    //     if (studentItems.length > 0) {
+    //         studentItems[0].click();
+    //     }
+    //     if (classOptions.length > 0) {
+    //         classOptions[0].click();
+    //     }
+    // }, 500);
+    
+    // Initial preview update
+    updatePreview();
+});
+</script>
+
+{% endblock %}

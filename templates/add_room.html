@@ -1,0 +1,786 @@
+{% extends "base.html" %}
+
+{% block page_title %}Add Room{% endblock %}
+{% block page_heading %}Add Room{% endblock %}
+{% block breadcrumb %}Rooms / Add{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+        <h2>Add New Room</h2>
+        <p>Register a new classroom or facility</p>
+    </div>
+    
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('add_room') }}" class="room-form">
+            <div class="form-layout">
+                <!-- LEFT COLUMN: Room Information -->
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-building-house'></i>
+                            Room Details
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="name">
+                                <i class='bx bx-rename'></i>
+                                Room Name / Number *
+                            </label>
+                            <input type="text" 
+                                   id="name" 
+                                   name="name" 
+                                   required
+                                   placeholder="e.g., Room 101, Science Lab, Auditorium"
+                                   class="form-input"
+                                   autofocus>
+                            <div class="form-hint">Enter a unique name or number for the room</div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="capacity">
+                                    <i class='bx bx-group'></i>
+                                    Capacity
+                                </label>
+                                <input type="number" 
+                                       id="capacity" 
+                                       name="capacity" 
+                                       min="1" 
+                                       max="500"
+                                       placeholder="e.g., 30"
+                                       class="form-input">
+                                <div class="form-hint">Maximum number of occupants</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="room_type" class="room-type-label">
+                                    <i class='bx bx-category'></i>
+                                    Room Type
+                                </label>
+                                <div class="room-type-display" id="roomTypeDisplay">
+                                    <span class="room-type-placeholder">Select capacity to suggest type</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- RIGHT COLUMN: Location & Features -->
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-map'></i>
+                            Location & Features
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="location">
+                                <i class='bx bx-map-pin'></i>
+                                Location / Building
+                            </label>
+                            <input type="text" 
+                                   id="location" 
+                                   name="location" 
+                                   placeholder="e.g., Main Building, 2nd Floor, Block A"
+                                   class="form-input">
+                            <div class="form-hint">Building name, floor, or specific location</div>
+                        </div>
+                        
+                        <!-- Room Features -->
+                        <div class="features-section">
+                            <label class="features-label">
+                                <i class='bx bx-checkbox-square'></i>
+                                Room Features (Optional)
+                            </label>
+                            
+                            <div class="features-grid">
+                                <label class="feature-checkbox">
+                                    <input type="checkbox" name="features" value="projector">
+                                    <span class="feature-icon">📽️</span>
+                                    <span class="feature-text">Projector</span>
+                                </label>
+                                
+                                <label class="feature-checkbox">
+                                    <input type="checkbox" name="features" value="whiteboard">
+                                    <span class="feature-icon">📋</span>
+                                    <span class="feature-text">Whiteboard</span>
+                                </label>
+                                
+                                <label class="feature-checkbox">
+                                    <input type="checkbox" name="features" value="computers">
+                                    <span class="feature-icon">💻</span>
+                                    <span class="feature-text">Computers</span>
+                                </label>
+                                
+                                <label class="feature-checkbox">
+                                    <input type="checkbox" name="features" value="aircon">
+                                    <span class="feature-icon">❄️</span>
+                                    <span class="feature-text">Air Conditioning</span>
+                                </label>
+                                
+                                <label class="feature-checkbox">
+                                    <input type="checkbox" name="features" value="wifi">
+                                    <span class="feature-icon">📶</span>
+                                    <span class="feature-text">Wi-Fi</span>
+                                </label>
+                                
+                                <label class="feature-checkbox">
+                                    <input type="checkbox" name="features" value="sound">
+                                    <span class="feature-icon">🔊</span>
+                                    <span class="feature-text">Sound System</span>
+                                </label>
+                            </div>
+                            <div class="form-hint">Select available amenities (not saved to database)</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Room Preview -->
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-show'></i>
+                            Room Preview
+                        </h3>
+                        
+                        <div class="room-preview" id="roomPreview">
+                            <div class="preview-header">
+                                <div class="preview-icon">
+                                    <i class='bx bx-building-house'></i>
+                                </div>
+                                <div class="preview-info">
+                                    <h4 id="previewName">New Room</h4>
+                                    <p id="previewLocation">Location not specified</p>
+                                </div>
+                            </div>
+                            
+                            <div class="preview-details">
+                                <div class="preview-detail">
+                                    <i class='bx bx-group'></i>
+                                    <span id="previewCapacity">Capacity: Not set</span>
+                                </div>
+                                <div class="preview-detail">
+                                    <i class='bx bx-category'></i>
+                                    <span id="previewType">Type: Standard</span>
+                                </div>
+                            </div>
+                            
+                            <div class="preview-features" id="previewFeatures">
+                                <span class="feature-tag">Basic</span>
+                            </div>
+                        </div>
+                        <div class="form-hint">Preview updates as you fill the form</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FORM ACTIONS -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class='bx bx-plus-circle'></i>
+                    Add Room
+                </button>
+                <a href="{{ url_for('rooms') }}" class="btn btn-secondary">
+                    <i class='bx bx-x'></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+/* ===== FORM STYLES ===== */
+.form-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 992px) {
+    .form-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-section {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--gray-300);
+}
+
+.section-title i {
+    color: var(--primary);
+    font-size: 1.25rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+}
+
+.form-group label i {
+    color: var(--gray-500);
+    font-size: 1rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    color: var(--gray-800);
+    background: var(--white);
+    transition: all 0.2s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-input::placeholder {
+    color: var(--gray-400);
+}
+
+/* Room Type Display */
+.room-type-display {
+    padding: 0.75rem 1rem;
+    background: var(--gray-100);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    color: var(--gray-700);
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+}
+
+.room-type-placeholder {
+    color: var(--gray-500);
+    font-style: italic;
+}
+
+.room-type-label {
+    cursor: default;
+}
+
+/* Room Type Colors */
+.room-type {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-weight: 500;
+    font-size: 0.75rem;
+}
+
+.type-classroom { background: #dbeafe; color: #1e40af; }
+.type-lab { background: #dcfce7; color: #166534; }
+.type-auditorium { background: #fef3c7; color: #92400e; }
+.type-office { background: #e0e7ff; color: #3730a3; }
+.type-library { background: #fce7f3; color: #9d174d; }
+
+/* Features Section */
+.features-section {
+    margin-top: 1.5rem;
+}
+
+.features-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: 1rem;
+}
+
+.features-label i {
+    color: var(--gray-500);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.feature-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    background: var(--white);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.feature-checkbox:hover {
+    border-color: var(--primary);
+    background: var(--gray-50);
+}
+
+.feature-checkbox input[type="checkbox"] {
+    display: none;
+}
+
+.feature-checkbox input[type="checkbox"]:checked + .feature-icon + .feature-text {
+    color: var(--primary);
+    font-weight: 500;
+}
+
+.feature-checkbox input[type="checkbox"]:checked {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.feature-icon {
+    font-size: 1.25rem;
+}
+
+.feature-text {
+    font-size: 0.875rem;
+    color: var(--gray-700);
+    transition: color 0.2s;
+}
+
+/* Room Preview */
+.room-preview {
+    padding: 1.5rem;
+    background: var(--white);
+    border: 2px solid var(--gray-300);
+    border-radius: var(--radius);
+    margin: 1rem 0;
+}
+
+.preview-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.preview-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: var(--radius);
+    background: var(--primary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 1.5rem;
+}
+
+.preview-info h4 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.preview-info p {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.875rem;
+    color: var(--gray-600);
+}
+
+.preview-details {
+    display: flex;
+    gap: 1.5rem;
+    margin: 1rem 0;
+}
+
+.preview-detail {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--gray-700);
+}
+
+.preview-detail i {
+    color: var(--gray-500);
+}
+
+.preview-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+.feature-tag {
+    padding: 0.25rem 0.75rem;
+    background: var(--gray-100);
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    color: var(--gray-700);
+}
+
+/* Form Hint */
+.form-hint {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    margin-top: 0.375rem;
+    font-style: italic;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--gray-300);
+    margin-top: 2rem;
+}
+
+.btn-lg {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.btn i {
+    margin-right: 0.5rem;
+}
+
+/* Card Header Styles */
+.card-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 0.25rem;
+}
+
+.card-header p {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    margin: 0;
+}
+
+/* Validation States */
+.form-input:invalid:not(:focus):not(:placeholder-shown) {
+    border-color: var(--danger);
+}
+
+.form-input:valid:not(:focus):not(:placeholder-shown) {
+    border-color: var(--success);
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-section {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.room-preview {
+    animation: fadeIn 0.5s ease-out 0.2s both;
+}
+
+/* Preview Animation */
+@keyframes previewUpdate {
+    0% { transform: scale(0.98); }
+    100% { transform: scale(1); }
+}
+
+.preview-update {
+    animation: previewUpdate 0.3s ease-out;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+    }
+    
+    .preview-details {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+}
+
+/* Feature Checkbox Active State */
+.feature-checkbox.active {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.feature-checkbox.active .feature-text {
+    color: var(--primary);
+    font-weight: 500;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('name');
+    const capacityInput = document.getElementById('capacity');
+    const locationInput = document.getElementById('location');
+    const roomTypeDisplay = document.getElementById('roomTypeDisplay');
+    const roomPreview = document.getElementById('roomPreview');
+    const featureCheckboxes = document.querySelectorAll('.feature-checkbox input[type="checkbox"]');
+    
+    // Room type suggestions based on capacity
+    function suggestRoomType(capacity) {
+        if (!capacity || capacity === '') {
+            return { type: 'Standard', color: 'type-classroom', icon: '🏫' };
+        }
+        
+        const cap = parseInt(capacity);
+        
+        if (cap <= 10) {
+            return { type: 'Small Office', color: 'type-office', icon: '🏢' };
+        } else if (cap <= 30) {
+            return { type: 'Classroom', color: 'type-classroom', icon: '🏫' };
+        } else if (cap <= 50) {
+            return { type: 'Lab', color: 'type-lab', icon: '🔬' };
+        } else if (cap <= 100) {
+            return { type: 'Lecture Hall', color: 'type-auditorium', icon: '🎓' };
+        } else if (cap <= 300) {
+            return { type: 'Auditorium', color: 'type-auditorium', icon: '🎭' };
+        } else {
+            return { type: 'Large Hall', color: 'type-auditorium', icon: '🏛️' };
+        }
+    }
+    
+    // Update room type display
+    function updateRoomTypeDisplay() {
+        const capacity = capacityInput.value;
+        const suggestion = suggestRoomType(capacity);
+        
+        roomTypeDisplay.innerHTML = `
+            <span class="room-type ${suggestion.color}">
+                <span class="type-icon">${suggestion.icon}</span>
+                <span class="type-name">${suggestion.type}</span>
+            </span>
+        `;
+    }
+    
+    // Update room preview
+    function updateRoomPreview() {
+        const name = nameInput.value || 'New Room';
+        const location = locationInput.value || 'Location not specified';
+        const capacity = capacityInput.value;
+        const suggestion = suggestRoomType(capacity);
+        
+        // Update preview elements
+        document.getElementById('previewName').textContent = name;
+        document.getElementById('previewLocation').textContent = location;
+        document.getElementById('previewCapacity').textContent = capacity ? `Capacity: ${capacity} people` : 'Capacity: Not set';
+        document.getElementById('previewType').textContent = `Type: ${suggestion.type}`;
+        
+        // Update features
+        const selectedFeatures = Array.from(featureCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+        
+        const featuresContainer = document.getElementById('previewFeatures');
+        featuresContainer.innerHTML = '';
+        
+        if (selectedFeatures.length > 0) {
+            selectedFeatures.forEach(feature => {
+                const featureNames = {
+                    'projector': 'Projector',
+                    'whiteboard': 'Whiteboard',
+                    'computers': 'Computers',
+                    'aircon': 'A/C',
+                    'wifi': 'Wi-Fi',
+                    'sound': 'Sound'
+                };
+                const span = document.createElement('span');
+                span.className = 'feature-tag';
+                span.textContent = featureNames[feature];
+                featuresContainer.appendChild(span);
+            });
+        } else {
+            featuresContainer.innerHTML = '<span class="feature-tag">Basic</span>';
+        }
+        
+        // Add animation
+        roomPreview.classList.add('preview-update');
+        setTimeout(() => roomPreview.classList.remove('preview-update'), 300);
+    }
+    
+    // Event listeners for real-time updates
+    nameInput.addEventListener('input', updateRoomPreview);
+    capacityInput.addEventListener('input', function() {
+        updateRoomTypeDisplay();
+        updateRoomPreview();
+    });
+    locationInput.addEventListener('input', updateRoomPreview);
+    
+    // Feature checkboxes
+    featureCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const parent = this.closest('.feature-checkbox');
+            if (this.checked) {
+                parent.classList.add('active');
+            } else {
+                parent.classList.remove('active');
+            }
+            updateRoomPreview();
+        });
+    });
+    
+    // Auto-generate room number if name suggests a number pattern
+    nameInput.addEventListener('blur', function() {
+        if (!this.value.includes('Room') && !this.value.includes('room')) {
+            // Check if it's just a number
+            const numMatch = this.value.match(/^(\d+)$/);
+            if (numMatch) {
+                this.value = `Room ${numMatch[1]}`;
+                updateRoomPreview();
+            }
+        }
+    });
+    
+    // Initialize displays
+    updateRoomTypeDisplay();
+    updateRoomPreview();
+    
+    // Form validation
+    const form = document.querySelector('.room-form');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            let errorMessage = '';
+            
+            // Validate room name
+            if (!nameInput.value.trim()) {
+                isValid = false;
+                errorMessage += '• Room Name is required\n';
+                nameInput.style.borderColor = 'var(--danger)';
+            } else {
+                nameInput.style.borderColor = '';
+            }
+            
+            // Validate capacity if provided
+            if (capacityInput.value) {
+                const capacity = parseInt(capacityInput.value);
+                if (capacity < 1 || capacity > 500) {
+                    errorMessage += '• Capacity must be between 1 and 500\n';
+                    capacityInput.style.borderColor = 'var(--warning)';
+                } else {
+                    capacityInput.style.borderColor = '';
+                }
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please correct the following:\n\n' + errorMessage);
+                
+                if (!nameInput.value.trim()) {
+                    nameInput.focus();
+                } else if (capacityInput.value && (parseInt(capacityInput.value) < 1 || parseInt(capacityInput.value) > 500)) {
+                    capacityInput.focus();
+                }
+            } else {
+                // Add loading state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="bx bx-loader-circle bx-spin"></i> Adding Room...';
+                    submitBtn.disabled = true;
+                }
+            }
+        });
+    }
+    
+    // Real-time validation feedback
+    nameInput.addEventListener('input', function() {
+        if (this.value.trim()) {
+            this.style.borderColor = 'var(--success)';
+        } else {
+            this.style.borderColor = '';
+        }
+    });
+    
+    capacityInput.addEventListener('input', function() {
+        if (this.value) {
+            const capacity = parseInt(this.value);
+            if (capacity >= 1 && capacity <= 500) {
+                this.style.borderColor = 'var(--success)';
+            } else {
+                this.style.borderColor = 'var(--warning)';
+            }
+        } else {
+            this.style.borderColor = '';
+        }
+    });
+    
+    // Focus management
+    setTimeout(() => {
+        if (nameInput && !nameInput.value) {
+            nameInput.focus();
+        }
+    }, 300);
+});
+</script>
+
+{% endblock %}

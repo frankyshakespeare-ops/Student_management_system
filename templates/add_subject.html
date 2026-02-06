@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block page_title %}Add Subject{% endblock %}
+{% block page_heading %}Add Subject{% endblock %}
+{% block breadcrumb %}Subjects / Add{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>Add New Subject</h2>
+        <p>Create a new subject with its coefficient and assignments</p>
+    </div>
+    
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('add_subject') }}" class="subject-form">
+            <div class="form-layout">
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-book-open'></i>
+                            Subject Details
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="name">
+                                <i class='bx bx-rename'></i>
+                                Subject Name *
+                            </label>
+                            <input type="text" 
+                                   id="name" 
+                                   name="name" 
+                                   required
+                                   placeholder="e.g., Mathematics, Physics, History..."
+                                   class="form-input"
+                                   autofocus>
+                            <div class="form-hint">Enter the name of the subject</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="coefficient">
+                                <i class='bx bx-line-chart'></i>
+                                Coefficient *
+                            </label>
+                            <div class="coefficient-selector">
+                                <button type="button" class="coeff-btn" data-value="1">1</button>
+                                <button type="button" class="coeff-btn" data-value="2">2</button>
+                                <button type="button" class="coeff-btn active" data-value="3">3</button>
+                                <button type="button" class="coeff-btn" data-value="4">4</button>
+                                <button type="button" class="coeff-btn" data-value="5">5</button>
+                                <input type="number" 
+                                       id="coefficient" 
+                                       name="coefficient" 
+                                       value="3" 
+                                       min="1" 
+                                       max="10" 
+                                       class="coeff-input">
+                            </div>
+                            <div class="form-hint">Weight of the subject in final grade (1-10)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-column">
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-link-alt'></i>
+                            Assignments (Optional)
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="class_id">
+                                <i class='bx bx-group'></i>
+                                Assign to Class
+                            </label>
+                            <select id="class_id" name="class_id" class="form-select">
+                                <option value="">Select a class (optional)</option>
+                                {% if classes %}
+                                    {% for class in classes %}
+                                    <option value="{{ class.id }}">{{ class.name }} ({{ class.level }})</option>
+                                    {% endfor %}
+                                {% endif %}
+                            </select>
+                            <div class="form-hint">Leave empty if subject is for multiple classes</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="teacher_id">
+                                <i class='bx bx-user-voice'></i>
+                                Assign Teacher
+                            </label>
+                            <select id="teacher_id" name="teacher_id" class="form-select">
+                                <option value="">Select a teacher (optional)</option>
+                                {% if teachers %}
+                                    {% for teacher in teachers %}
+                                    <option value="{{ teacher.id }}">{{ teacher.first_name }} {{ teacher.last_name }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                            </select>
+                            <div class="form-hint">Can be assigned later</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3 class="section-title">
+                            <i class='bx bx-show'></i>
+                            Subject Preview
+                        </h3>
+                        
+                        <div class="preview-card">
+                            <div class="preview-header">
+                                <span class="preview-icon">
+                                    <i class='bx bx-book'></i>
+                                </span>
+                                <div class="preview-title">
+                                    <h4 id="previewName">New Subject</h4>
+                                    <span class="preview-coefficient" id="previewCoeff">Coefficient: 3</span>
+                                </div>
+                            </div>
+                            <div class="preview-details">
+                                <div class="preview-item">
+                                    <i class='bx bx-group'></i>
+                                    <span id="previewClass">Class: Not assigned</span>
+                                </div>
+                                <div class="preview-item">
+                                    <i class='bx bx-user'></i>
+                                    <span id="previewTeacher">Teacher: Not assigned</span>
+                                </div>
+                            </div>
+                            <div class="preview-footer">
+                                <span class="preview-id">ID: SUB-0000</span>
+                            </div>
+                        </div>
+                        <div class="form-hint">This is how the subject will appear in lists</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class='bx bx-plus-circle'></i>
+                    Create Subject
+                </button>
+                <a href="{{ url_for('subjects') }}" class="btn btn-secondary">
+                    <i class='bx bx-x'></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+/* Variables fallback si elles ne sont pas dans base.html */
+:root {
+    --primary: #ffcb62;
+    --primary-light: #60a5fa;
+    --primary-dark: #1e40af;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    --white: #ffffff;
+    --radius: 0.5rem;
+    --radius-md: 0.75rem;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --success: #10b981;
+}
+
+.form-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 992px) {
+    .form-layout { grid-template-columns: 1fr; }
+}
+
+.form-column { display: flex; flex-direction: column; gap: 1.5rem; }
+
+.form-section {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--gray-300);
+}
+
+.section-title i { color: var(--primary); font-size: 1.25rem; }
+
+.form-group { margin-bottom: 1.25rem; }
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+}
+
+.form-input, .form-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    font-size: 0.875rem;
+    color: var(--gray-800);
+    background: var(--white);
+    transition: all 0.2s;
+}
+
+.coefficient-selector { display: flex; gap: 0.5rem; margin: 0.5rem 0; }
+
+.coeff-btn {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid var(--gray-300);
+    border-radius: var(--radius);
+    background: var(--white);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.coeff-btn.active { background: var(--primary); color: var(--white); border-color: var(--primary); }
+
+.coeff-input { display: none; }
+
+.preview-card {
+    background: var(--white);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    animation: fadeIn 0.5s ease-out 0.2s both;
+}
+
+.preview-header { display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid var(--gray-200); padding-bottom: 1rem; margin-bottom: 1rem; }
+
+.preview-icon { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-light), var(--primary)); display: flex; align-items: center; justify-content: center; color: var(--white); font-size: 1.5rem; }
+
+.preview-coefficient { display: inline-block; padding: 0.25rem 0.75rem; background: var(--gray-100); border-radius: 1rem; font-size: 0.75rem; margin-top: 0.25rem; }
+
+/* Coeff Colors */
+.coeff-1 { background: #dbeafe !important; color: #1e40af !important; }
+.coeff-2 { background: #e0f2fe !important; color: #0c4a6e !important; }
+.coeff-3 { background: #dcfce7 !important; color: #166534 !important; }
+.coeff-4 { background: #fef3c7 !important; color: #92400e !important; }
+.coeff-5 { background: #fee2e2 !important; color: #991b1b !important; }
+
+.form-actions { display: flex; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--gray-300); margin-top: 2rem; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulseUpdate { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+.pulse { animation: pulseUpdate 0.3s ease; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('name');
+    const coefficientInput = document.getElementById('coefficient');
+    const classSelect = document.getElementById('class_id');
+    const teacherSelect = document.getElementById('teacher_id');
+    const coeffButtons = document.querySelectorAll('.coeff-btn');
+    
+    const previewName = document.getElementById('previewName');
+    const previewCoeff = document.getElementById('previewCoeff');
+    const previewClass = document.getElementById('previewClass');
+    const previewTeacher = document.getElementById('previewTeacher');
+
+    function updatePreview() {
+        // Name
+        previewName.textContent = nameInput.value.trim() || 'New Subject';
+        previewName.style.color = nameInput.value.trim() ? 'var(--gray-900)' : 'var(--gray-500)';
+        
+        // Coeff
+        const val = coefficientInput.value;
+        previewCoeff.textContent = `Coefficient: ${val}`;
+        previewCoeff.className = 'preview-coefficient';
+        previewCoeff.classList.add(`coeff-${val}`);
+        
+        // Class & Teacher
+        previewClass.textContent = classSelect.selectedIndex > 0 ? `Class: ${classSelect.options[classSelect.selectedIndex].text}` : 'Class: Not assigned';
+        previewTeacher.textContent = teacherSelect.selectedIndex > 0 ? `Teacher: ${teacherSelect.options[teacherSelect.selectedIndex].text}` : 'Teacher: Not assigned';
+
+        const card = document.querySelector('.preview-card');
+        card.classList.remove('pulse');
+        void card.offsetWidth; // trigger reflow
+        card.classList.add('pulse');
+    }
+
+    coeffButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            coeffButtons.forEach(b => b.classList.remove('active', 'coeff-1', 'coeff-2', 'coeff-3', 'coeff-4', 'coeff-5'));
+            this.classList.add('active');
+            const val = this.getAttribute('data-value');
+            this.classList.add(`coeff-${val}`);
+            coefficientInput.value = val;
+            updatePreview();
+        });
+        
+        // Init color for active button
+        if(btn.classList.contains('active')) {
+            btn.classList.add(`coeff-${btn.getAttribute('data-value')}`);
+        }
+    });
+
+    [nameInput, classSelect, teacherSelect].forEach(el => {
+        el.addEventListener('input', updatePreview);
+    });
+
+    // Form Validation
+    const form = document.querySelector('.subject-form');
+    form.addEventListener('submit', function(e) {
+        if (!nameInput.value.trim()) {
+            e.preventDefault();
+            alert('Subject name is required');
+            nameInput.focus();
+        }
+    });
+
+    updatePreview();
+});
+</script>
+{% endblock %}
